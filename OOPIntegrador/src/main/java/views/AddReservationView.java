@@ -18,6 +18,8 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import models.Client;
+import models.ClientDao;
 import models.Reservation;
 import models.ReservationDao;
 import models.Room;
@@ -40,6 +42,7 @@ public class AddReservationView extends javax.swing.JFrame {
     private final ReservationDao reservDao;
     private Room actualRoom;
     private String actualCategory;
+    private final ClientDao clientDao;
 
     /**
      *
@@ -48,15 +51,19 @@ public class AddReservationView extends javax.swing.JFrame {
      * @param dao
      * @param reservDao
      */
-    public AddReservationView(boolean isInsert, MainView mainView, RoomDao dao, ReservationDao reservDao) {
+    public AddReservationView(boolean isInsert,JTable table, MainView mainView, RoomDao dao, ReservationDao reservDao, ClientDao clientDao) {
         initComponents();
         this.isInsert = isInsert;
         this.mainView = mainView;
         this.roomDao = dao;
         this.reservDao = reservDao;
+        this.clientDao = clientDao;
+        this.table = table;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowClosingEvent();
         assignRoomNumbersMap();
+        setLocation(700, 450);
+
     }
 
     /**
@@ -68,13 +75,14 @@ public class AddReservationView extends javax.swing.JFrame {
      * @param roomDao
      * @param reservDao
      */
-    public AddReservationView(boolean isInsert, JTable model, Object[] data, MainView mainView, RoomDao roomDao, ReservationDao reservDao) {
+    public AddReservationView(boolean isInsert, JTable model, Object[] data, MainView mainView, RoomDao roomDao, ReservationDao reservDao, ClientDao clientDao) {
         initComponents();
         this.isInsert = isInsert;
         this.table = model;
         this.mainView = mainView;
         this.roomDao = roomDao;
         this.reservDao = reservDao;
+        this.clientDao = clientDao;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowClosingEvent();
         assignRoomNumbersMap();
@@ -109,6 +117,7 @@ public class AddReservationView extends javax.swing.JFrame {
         ArrayList<Reservation> reservations = (ArrayList<Reservation>) reservDao.getAll();
         ArrayList<Integer> roomsOcupied = new ArrayList<>();
         ArrayList<Room> roomsDesocupied = new ArrayList<>();
+
         for (Reservation r : reservations) {
             roomsOcupied.add(r.getRoomNumber());
         }
@@ -132,6 +141,10 @@ public class AddReservationView extends javax.swing.JFrame {
             }
             roomNumberSelBox.setSelectedIndex(0);
         }
+    }
+
+    public void setClientName(String nombre) {
+        this.NewClientTxtField.setText(nombre);
     }
 
     private void addWindowClosingEvent() {
@@ -179,6 +192,11 @@ public class AddReservationView extends javax.swing.JFrame {
         });
 
         AddUserBtn.setText("Añadir Nuevo Cliente");
+        AddUserBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AddUserBtnActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Nombre:");
 
@@ -189,6 +207,11 @@ public class AddReservationView extends javax.swing.JFrame {
         jLabel3.setText("Numero:");
 
         ReserveBtn.setText("Reservar");
+        ReserveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ReserveBtnActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Inicio:");
 
@@ -297,9 +320,35 @@ public class AddReservationView extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "No hay habitaciones disponibles");
             return;
         }
-
-
     }//GEN-LAST:event_roomCategorySelBoxActionPerformed
+
+    private void AddUserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddUserBtnActionPerformed
+        AddClientView adv = new AddClientView(clientDao, this, (DefaultTableModel) table.getModel());
+        adv.setVisible(true);
+        this.setEnabled(false);
+    }//GEN-LAST:event_AddUserBtnActionPerformed
+    private int getIdByName() {
+        for(Client c: clientDao.getAll()){
+            if (c.getName().equalsIgnoreCase(NewClientTxtField.getText())) {
+                return c.getID();
+            }
+        }
+        return -1;
+    }
+
+    private void ReserveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReserveBtnActionPerformed
+        if (NewClientTxtField == null || reservDateChooser.getDate() == null || endDateChooser.getDate() == null || roomNumberSelBox.getSelectedItem() == null || roomNumberSelBox.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "Complete los datos");
+            return;
+        }
+        int clientId = getIdByName();
+        if (clientId == -1) {
+            JOptionPane.showMessageDialog(null, "No existe el cliente");
+            return;
+        }
+        reservDao.save(new Reservation(-1, Integer.valueOf(roomNumberSelBox.getSelectedItem().toString()),clientId, new java.sql.Date(reservDateChooser.getDate().getTime()), new java.sql.Date(endDateChooser.getDate().getTime())));
+        this.dispose();
+    }//GEN-LAST:event_ReserveBtnActionPerformed
 
     /**
      * @param args the command line arguments

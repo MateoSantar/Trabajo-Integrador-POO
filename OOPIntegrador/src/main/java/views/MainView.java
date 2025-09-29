@@ -256,7 +256,7 @@ public class MainView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void reserveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveBtnActionPerformed
-        AddReservationView arv = new AddReservationView(true,this,rooms,reservs);
+        AddReservationView arv = new AddReservationView(true,reservationsTable,this,rooms,reservs, clients);
         arv.setVisible(true);
         this.setEnabled(false);
     }//GEN-LAST:event_reserveBtnActionPerformed
@@ -273,7 +273,7 @@ public class MainView extends javax.swing.JFrame {
         for (int i = 0; i < columnCount; i++) {
             row[i] = model.getValueAt(selectedRow, i);
         }
-        AddReservationView arv = new AddReservationView(false, reservationsTable, row,this,rooms,reservs);
+        AddReservationView arv = new AddReservationView(false, reservationsTable, row,this,rooms,reservs,clients);
         arv.setVisible(true);
         this.setEnabled(false);
     }//GEN-LAST:event_updateBtnActionPerformed

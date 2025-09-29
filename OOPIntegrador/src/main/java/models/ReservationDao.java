@@ -63,14 +63,16 @@ public class ReservationDao implements Dao<Reservation> {
     public void save(Reservation r) {
         try {
             String query = "INSERT INTO reservas (idCliente,numeroHabitacion,fecha_inicio,fecha_fin) VALUES (?,?,?,?)";
-            PreparedStatement ps = conn.prepareStatement(query);
+            PreparedStatement ps = conn.prepareStatement(query,PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setInt(1, r.getIdClient());
             ps.setInt(2, r.getRoomNumber());
             ps.setDate(3, r.getStartDate());
             ps.setDate(4, r.getEndDate());
+            
             int affectedRow = ps.executeUpdate();
             if (affectedRow > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
+                rs.next();
                 r.setID(rs.getInt(1));
                 reservations.add(r);
             } else {

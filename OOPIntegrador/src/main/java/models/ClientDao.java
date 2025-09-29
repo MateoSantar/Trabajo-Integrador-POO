@@ -62,14 +62,21 @@ public class ClientDao implements Dao<Client> {
     public void save(Client c) {
         try{
             String query = "INSERT INTO clientes (nombre,apellido,telefono) VALUES (?,?,?)";
-            PreparedStatement ps = conn.prepareStatement(query);
+            PreparedStatement ps = conn.prepareStatement(query,PreparedStatement.RETURN_GENERATED_KEYS);
             String[] name = c.getName().split(" ");
             ps.setString(1, name[0]);
             ps.setString(2, name[1]);
             ps.setString(3, c.getPhone());
-            ResultSet rs = ps.getGeneratedKeys();
-            c.setID(rs.getInt(1));
-            clients.add(c);
+            int affectedRow = ps.executeUpdate();
+            if (affectedRow > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                rs.next();
+                c.setID(rs.getInt(1));
+                clients.add(c);
+            } else {
+                JOptionPane.showMessageDialog(null, "Error al guardar nuevo cliente", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            
             ps.close();
         } catch (SQLException ex){
             Logger.getLogger(ReservationDao.class.getName()).log(Level.SEVERE, null, ex);

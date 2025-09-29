@@ -56,13 +56,14 @@ public class RoomDao implements Dao<Room> {
     public void save(Room room) {
         try {
             String query = "INSERT INTO habitaciones (numeroHabitacion,categoria,precio) VALUES (?,?,?)";
-            PreparedStatement ps = conn.prepareStatement(query);
+            PreparedStatement ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setInt(1, room.getRoomNumber());
             ps.setString(2, room.getCategory());
             ps.setDouble(3, room.getPrice());
             int affectedRow = ps.executeUpdate();
             if (affectedRow > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
+                rs.next();
                 room.setID(rs.getInt(1));
                 rooms.add(room);
             } else {
