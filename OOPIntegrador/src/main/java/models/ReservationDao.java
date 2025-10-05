@@ -1,5 +1,6 @@
 package models;
 
+import com.mysql.cj.xdevapi.PreparableStatement;
 import interfaces.Dao;
 import java.sql.Connection;
 import java.sql.Date;
@@ -34,7 +35,7 @@ public class ReservationDao implements Dao<Reservation> {
                 int roomNumber = rs.getInt("numeroHabitacion");
                 Date fecha_inicio = rs.getDate("fecha_inicio");
                 Date fecha_final = rs.getDate("fecha_fin");
-                reservations.add(new Reservation(id, roomNumber, idClient, fecha_inicio,fecha_final));
+                reservations.add(new Reservation(id, roomNumber, idClient, fecha_inicio, fecha_final));
             }
             ps.close();
 
@@ -63,12 +64,12 @@ public class ReservationDao implements Dao<Reservation> {
     public void save(Reservation r) {
         try {
             String query = "INSERT INTO reservas (idCliente,numeroHabitacion,fecha_inicio,fecha_fin) VALUES (?,?,?,?)";
-            PreparedStatement ps = conn.prepareStatement(query,PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setInt(1, r.getIdClient());
             ps.setInt(2, r.getRoomNumber());
             ps.setDate(3, r.getStartDate());
             ps.setDate(4, r.getEndDate());
-            
+
             int affectedRow = ps.executeUpdate();
             if (affectedRow > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
@@ -76,22 +77,38 @@ public class ReservationDao implements Dao<Reservation> {
                 r.setID(rs.getInt(1));
                 reservations.add(r);
             } else {
-                JOptionPane.showMessageDialog(null, "Error al guardar nueva reserva", "Error", JOptionPane.ERROR_MESSAGE);
+                Utils.ShowErr("Error al guardar nueva reserva", "Error");
             }
 
             ps.close();
         } catch (SQLException ex) {
-            Logger.getLogger(ReservationDao.class.getName()).log(Level.SEVERE, null, ex);
+            Utils.ShowErr("Excepcion en guardado de reserva: " + ex.getMessage(), "Excepcion");
         }
 
     }
 
     @Override
     public boolean update(Reservation oldOne, Reservation newOne) {
-        int index = reservations.indexOf(oldOne);
-        if (index != -1) {
-            reservations.set(index, newOne);
-            return true;
+        try {
+            int index = reservations.indexOf(oldOne);
+            if (index == -1) {
+                return false;
+            }
+
+            String query = "UPDATE reservas SET idCliente = ?, numeroHabitacion = ?, fecha_inicio = ?, fecha_fin = ? WHERE idReserva = ?";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, newOne.getIdClient());
+            ps.setInt(2, newOne.getRoomNumber());
+            ps.setDate(3, newOne.getStartDate());
+            ps.setDate(4, newOne.getEndDate());
+            ps.setInt(5, oldOne.getID());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows != 0) {
+                reservations.set(index, newOne);
+                return true;
+            }
+        } catch (SQLException ex) {
+            Utils.ShowErr("Excepcion: " + ex.getMessage(), "Excepcion");
         }
         return false;
     }
@@ -106,7 +123,7 @@ public class ReservationDao implements Dao<Reservation> {
             ps.executeUpdate();
             ps.close();
         } catch (SQLException ex) {
-            Logger.getLogger(ReservationDao.class.getName()).log(Level.SEVERE, null, ex);
+            Utils.ShowErr("Excepcion: " + ex.getMessage(), "Excepcion");
         }
     }
 

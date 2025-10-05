@@ -8,8 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -52,7 +50,7 @@ public class ClientDao implements Dao<Client> {
                 return c;
             }
         }
-        System.out.println("No se encontro un cliente"); // <-- En la ventana de busqueda, debe mostrarse el error
+         // <-- En la ventana de busqueda, debe mostrarse el error
         return null;
     }
 
@@ -74,13 +72,12 @@ public class ClientDao implements Dao<Client> {
                 c.setID(rs.getInt(1));
                 clients.add(c);
             } else {
-                JOptionPane.showMessageDialog(null, "Error al guardar nuevo cliente", "Error", JOptionPane.ERROR_MESSAGE);
+                Utils.ShowErr("Error al guardar nuevo cliente", "Error en guardado");
             }
             
             ps.close();
         } catch (SQLException ex){
-            Logger.getLogger(ReservationDao.class.getName()).log(Level.SEVERE, null, ex);
-
+            Utils.ShowErr("Excepcion: "+ex.getMessage(), "Excepcion");
         }
     }
 
@@ -91,6 +88,7 @@ public class ClientDao implements Dao<Client> {
             clients.set(index, newClient);
             return true;
         }
+        Utils.ShowErr("Error en el update del cliente", "Error"); // <== En ningun momento se deberia utilizar el update de Client, pero ahi esta
         return false;
     }
 
@@ -98,5 +96,7 @@ public class ClientDao implements Dao<Client> {
     public void delete(Client c) {
         clients.remove(c);
     }
+    
+    
     
 }

@@ -47,11 +47,13 @@ public class AddReservationView extends javax.swing.JFrame {
     /**
      *
      * @param isInsert
+     * @param table
      * @param mainView
      * @param dao
      * @param reservDao
+     * @param clientDao
      */
-    public AddReservationView(boolean isInsert,JTable table, MainView mainView, RoomDao dao, ReservationDao reservDao, ClientDao clientDao) {
+    public AddReservationView(boolean isInsert, JTable table, MainView mainView, RoomDao dao, ReservationDao reservDao, ClientDao clientDao) {
         initComponents();
         this.isInsert = isInsert;
         this.mainView = mainView;
@@ -74,6 +76,7 @@ public class AddReservationView extends javax.swing.JFrame {
      * @param mainView
      * @param roomDao
      * @param reservDao
+     * @param clientDao
      */
     public AddReservationView(boolean isInsert, JTable model, Object[] data, MainView mainView, RoomDao roomDao, ReservationDao reservDao, ClientDao clientDao) {
         initComponents();
@@ -318,7 +321,6 @@ public class AddReservationView extends javax.swing.JFrame {
             }
         } else {
             JOptionPane.showMessageDialog(null, "No hay habitaciones disponibles");
-            return;
         }
     }//GEN-LAST:event_roomCategorySelBoxActionPerformed
 
@@ -328,7 +330,7 @@ public class AddReservationView extends javax.swing.JFrame {
         this.setEnabled(false);
     }//GEN-LAST:event_AddUserBtnActionPerformed
     private int getIdByName() {
-        for(Client c: clientDao.getAll()){
+        for (Client c : clientDao.getAll()) {
             if (c.getName().equalsIgnoreCase(NewClientTxtField.getText())) {
                 return c.getID();
             }
@@ -346,7 +348,24 @@ public class AddReservationView extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "No existe el cliente");
             return;
         }
-        reservDao.save(new Reservation(-1, Integer.valueOf(roomNumberSelBox.getSelectedItem().toString()),clientId, new java.sql.Date(reservDateChooser.getDate().getTime()), new java.sql.Date(endDateChooser.getDate().getTime())));
+
+        if (!isInsert) {
+            int idSelected = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
+            for (Reservation r : reservDao.getAll()) {
+                if (r.getID() == idSelected) {
+                    reservDao.update(r, new Reservation(r.getID(), Integer.parseInt(roomNumberSelBox.getSelectedItem().toString()), clientId, new java.sql.Date(reservDateChooser.getDate().getTime()), new java.sql.Date(endDateChooser.getDate().getTime())));
+                    break;
+                }
+            }
+            mainView.reloadReservations();
+            mainView.setEnabled(true);
+            this.dispose();
+            return;
+        }
+
+        reservDao.save(new Reservation(-1, Integer.parseInt(roomNumberSelBox.getSelectedItem().toString()), clientId, new java.sql.Date(reservDateChooser.getDate().getTime()), new java.sql.Date(endDateChooser.getDate().getTime())));
+        mainView.reloadReservations();
+        mainView.setEnabled(true);
         this.dispose();
     }//GEN-LAST:event_ReserveBtnActionPerformed
 

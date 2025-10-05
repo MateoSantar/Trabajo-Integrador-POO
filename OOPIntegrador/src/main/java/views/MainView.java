@@ -4,19 +4,24 @@
  */
 package views;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import models.*;
+
 /**
  *
- * @author Mateo Santarsiero 
+ * @author Mateo Santarsiero
  */
 public class MainView extends javax.swing.JFrame {
 
@@ -27,6 +32,8 @@ public class MainView extends javax.swing.JFrame {
     private RoomDao rooms;
     private ClientDao clients;
     private ReservationDao reservs;
+    private DefaultTableModel tableDefaultModel;
+
     /**
      *
      * @param conn
@@ -40,9 +47,9 @@ public class MainView extends javax.swing.JFrame {
         removeDefaultRows();
         loadReservations();
         centerWindow(this);
-        
+
     }
-    
+
     /**
      *
      * @param window
@@ -54,11 +61,11 @@ public class MainView extends javax.swing.JFrame {
         window.setLocation(x, y);
     }
 
-    private void loadReservations(){ 
+    private void loadReservations() {
         DefaultTableModel model = (DefaultTableModel) reservationsTable.getModel();
-        ArrayList<Room> roomsAL = (ArrayList)rooms.getAll();
-        ArrayList<Client> clientsAL = (ArrayList)clients.getAll();
-        ArrayList<Reservation> reservationsAL = (ArrayList)reservs.getAll();
+        model.setRowCount(0);
+        tableDefaultModel = model;
+        ArrayList<Reservation> reservationsAL = (ArrayList) reservs.getAll();
         for (Reservation reservation : reservationsAL) {
             Object[] data = new Object[7];
             data[0] = String.valueOf(reservation.getID());
@@ -70,11 +77,16 @@ public class MainView extends javax.swing.JFrame {
             data[6] = reservation.getEndDate().toString();
             model.addRow(data);
         }
-        
-        
+
     }
-    
-    private String getClientName(int id){
+
+    public void reloadReservations() {
+        this.loadReservations();
+    }
+
+    ;
+
+    private String getClientName(int id) {
         for (Client c : clients.getAll()) {
             if (c.getID() == id) {
                 return c.getName();
@@ -82,37 +94,32 @@ public class MainView extends javax.swing.JFrame {
         }
         return null;
     }
-    
-    private String getRoomCategory(int roomNumber){
-        for (Room r : rooms.getAll()){
+
+    private String getRoomCategory(int roomNumber) {
+        for (Room r : rooms.getAll()) {
             if (r.getRoomNumber() == roomNumber) {
                 return r.getCategory();
             }
         }
         return null;
     }
-    
-    private double getRoomPrice(int roomNumber){
-        for (Room r : rooms.getAll()){
+
+    private double getRoomPrice(int roomNumber) {
+        for (Room r : rooms.getAll()) {
             if (r.getRoomNumber() == roomNumber) {
                 return r.getPrice();
             }
         }
         return -1;
     }
-     
-        
 
-    
-    
-    
-    
-    private void removeDefaultRows(){
+    private void removeDefaultRows() {
         DefaultTableModel model = (DefaultTableModel) reservationsTable.getModel();
         for (int i = 0; i < 4; i++) {
             model.removeRow(0);
         }
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -129,9 +136,9 @@ public class MainView extends javax.swing.JFrame {
         reserveBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         reservationsTable = new javax.swing.JTable();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        searchFactorComboBox = new javax.swing.JComboBox<>();
         searchTextField = new java.awt.TextField();
-        searchBtn1 = new javax.swing.JButton();
+        searchBtn = new javax.swing.JButton();
         updateBtn = new javax.swing.JButton();
 
         Update_Menu_Item.setText("Editar");
@@ -144,6 +151,7 @@ public class MainView extends javax.swing.JFrame {
         setTitle("Main View");
         setResizable(false);
 
+        deleteBtn.setForeground(new java.awt.Color(0, 0, 0));
         deleteBtn.setText("Eliminar");
         deleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -151,8 +159,10 @@ public class MainView extends javax.swing.JFrame {
             }
         });
 
+        reserveBtn.setForeground(new java.awt.Color(0, 0, 0));
         reserveBtn.setText("Reservar");
         reserveBtn.setToolTipText("Agrega una reserva");
+        reserveBtn.setOpaque(true);
         reserveBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 reserveBtnActionPerformed(evt);
@@ -200,11 +210,18 @@ public class MainView extends javax.swing.JFrame {
             reservationsTable.getColumnModel().getColumn(6).setResizable(false);
         }
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ID", "Categoria", "Cliente" }));
-        jComboBox1.setToolTipText("");
+        searchFactorComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ID", "Categoria", "Cliente" }));
+        searchFactorComboBox.setToolTipText("");
 
-        searchBtn1.setText("Buscar");
+        searchBtn.setForeground(new java.awt.Color(0, 0, 0));
+        searchBtn.setText("Buscar");
+        searchBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchBtnActionPerformed(evt);
+            }
+        });
 
+        updateBtn.setForeground(new java.awt.Color(0, 0, 0));
         updateBtn.setText("Actualizar");
         updateBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -227,9 +244,9 @@ public class MainView extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deleteBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(searchBtn1)
+                        .addComponent(searchBtn)
                         .addGap(33, 33, 33)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(searchFactorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -244,8 +261,8 @@ public class MainView extends javax.swing.JFrame {
                         .addComponent(deleteBtn)
                         .addComponent(reserveBtn)
                         .addComponent(updateBtn)
-                        .addComponent(searchBtn1)
-                        .addComponent(jComboBox1))
+                        .addComponent(searchBtn)
+                        .addComponent(searchFactorComboBox))
                     .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 473, Short.MAX_VALUE)
@@ -256,7 +273,7 @@ public class MainView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void reserveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveBtnActionPerformed
-        AddReservationView arv = new AddReservationView(true,reservationsTable,this,rooms,reservs, clients);
+        AddReservationView arv = new AddReservationView(true, reservationsTable, this, rooms, reservs, clients);
         arv.setVisible(true);
         this.setEnabled(false);
     }//GEN-LAST:event_reserveBtnActionPerformed
@@ -273,7 +290,7 @@ public class MainView extends javax.swing.JFrame {
         for (int i = 0; i < columnCount; i++) {
             row[i] = model.getValueAt(selectedRow, i);
         }
-        AddReservationView arv = new AddReservationView(false, reservationsTable, row,this,rooms,reservs,clients);
+        AddReservationView arv = new AddReservationView(false, reservationsTable, row, this, rooms, reservs, clients);
         arv.setVisible(true);
         this.setEnabled(false);
     }//GEN-LAST:event_updateBtnActionPerformed
@@ -290,17 +307,125 @@ public class MainView extends javax.swing.JFrame {
         dtm.removeRow(selectedRow);
     }//GEN-LAST:event_deleteBtnActionPerformed
 
+    private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        String selectedFactor = searchFactorComboBox.getSelectedItem().toString();
+        if (searchTextField.getText().isBlank()) {
+            reservationsTable.setModel(tableDefaultModel);
+            return;
+        }
+        if (reservationsTable.getModel().getColumnCount() <= 0 || reservationsTable.getModel().getRowCount() <= 0) {
+            Utils.ShowInfo("No hay reservas");
+            return;
+        }
+        String searchFieldText = searchTextField.getText();
+        switch (selectedFactor) {
+            case "ID" -> {
+                searchById(searchFieldText, tableDefaultModel);
+            }
+            case "Cliente" -> {
+                searchByClientName(searchFieldText, tableDefaultModel);
+            }
+            case "Categoria" -> {
+                searchByCategory(searchFieldText, tableDefaultModel);
+            }
+            default ->
+                Utils.ShowErr("Factor seleccionado erroneo", "Factor erroneo");
+        }
+
+
+    }//GEN-LAST:event_searchBtnActionPerformed
+    private void searchById(String id, DefaultTableModel model) {
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+
+        Object[] foundRow = new Object[columnCount];
+        for (int i = 0; i < rowCount; i++) {
+            if (model.getValueAt(i, 0).toString().equals(id)) {
+                for (int j = 0; j < columnCount; j++) {
+                    foundRow[j] = model.getValueAt(i, j);
+                }
+            }
+        }
+        if (foundRow[0] == null) {
+            Utils.ShowInfo("No se encontro una reserva con ese ID");
+            return;
+        }
+        Utils.ShowInfo(Arrays.deepToString(foundRow));
+        String[] columnsNames = new String[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            columnsNames[i] = model.getColumnName(i);
+        }
+        DefaultTableModel modelFound = new DefaultTableModel(columnsNames, 0);
+        modelFound.addRow(foundRow);
+        reservationsTable.setModel(modelFound);
+    }
+
+    private void searchByClientName(String name, DefaultTableModel model) {
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+        String[] columnsNames = new String[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            columnsNames[i] = model.getColumnName(i);
+        }
+        ArrayList<Object[]> rowsFound = new ArrayList<>();
+        for (int i = 0; i < rowCount; i++) {
+            if (model.getValueAt(i, 1).toString().equalsIgnoreCase(name)) {
+                Object[] rowData = new Object[columnCount];
+                for (int j = 0; j < columnCount; j++) {
+                    rowData[j] = model.getValueAt(i, j);
+                }
+                rowsFound.add(rowData);
+            }
+        }
+        if (rowsFound.isEmpty()) {
+            Utils.ShowInfo("No se encontraron clientes con ese nombre");
+            return;
+        }
+        DefaultTableModel modelFound = new DefaultTableModel(columnsNames, 0);
+        for (Object[] objects : rowsFound) {
+            modelFound.addRow(objects);
+        }
+        reservationsTable.setModel(modelFound);
+    }
+
+    private void searchByCategory(String category, DefaultTableModel model) {
+        int rowCount = model.getRowCount();
+        int columnCount = model.getColumnCount();
+        String[] columnsNames = new String[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            columnsNames[i] = model.getColumnName(i);
+        }
+        ArrayList<Object[]> rowsFound = new ArrayList<>();
+        for (int i = 0; i < rowCount; i++) {
+            if (model.getValueAt(i, 2).toString().equalsIgnoreCase(category)) {
+                Object[] rowData = new Object[columnCount];
+                for (int j = 0; j < columnCount; j++) {
+                    rowData[j] = model.getValueAt(i, j);
+                }
+                rowsFound.add(rowData);
+            }
+        }
+        if (rowsFound.isEmpty()) {
+            Utils.ShowInfo("No se encontraron reservas con esa categoria");
+            return;
+        }
+        DefaultTableModel modelFound = new DefaultTableModel(columnsNames, 0);
+        for (Object[] objects : rowsFound) {
+            modelFound.addRow(objects);
+        }
+        reservationsTable.setModel(modelFound);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem Delete_Menu_Item;
     private javax.swing.JPopupMenu RightClickMenu;
     private javax.swing.JMenuItem Update_Menu_Item;
     private javax.swing.JButton deleteBtn;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable reservationsTable;
     private javax.swing.JButton reserveBtn;
-    private javax.swing.JButton searchBtn1;
+    private javax.swing.JButton searchBtn;
+    private javax.swing.JComboBox<String> searchFactorComboBox;
     private java.awt.TextField searchTextField;
     private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
