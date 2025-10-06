@@ -67,12 +67,12 @@ public class RoomDao implements Dao<Room> {
                 room.setID(rs.getInt(1));
                 rooms.add(room);
             } else {
-                JOptionPane.showMessageDialog(null, "Error al guardar nueva habitacion", "Error", JOptionPane.ERROR_MESSAGE);
+                Utils.ShowErr("Error al guardar nueva habitacion", "Error");
             }
 
             ps.close();
         } catch (SQLException ex) {
-            Logger.getLogger(RoomDao.class.getName()).log(Level.SEVERE, null, ex);
+            Utils.ShowErr("Excepcion: "+ex.getMessage(), "Excepcion");
         }
 
     }
@@ -93,7 +93,7 @@ public class RoomDao implements Dao<Room> {
                 rooms.set(index, newOne);
                 return true;
             } catch (SQLException ex) {
-                Logger.getLogger(RoomDao.class.getName()).log(Level.SEVERE, null, ex);
+                Utils.ShowErr("Excepcion: "+ex.getMessage(), "Excepcion");
             }
         }
         return false;
@@ -101,14 +101,17 @@ public class RoomDao implements Dao<Room> {
 
     @Override
     public void delete(Room room) {
-        rooms.remove(room);
-    }
-
-    public void closeConnection() {
-        try {
-            this.conn.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(RoomDao.class.getName()).log(Level.SEVERE, null, ex);
+        try{
+            rooms.remove(room);
+            String query = "DELETE FROM habitaciones WHERE idHabitacion =?";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, room.getID());
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException ex){
+            Utils.ShowErr("Excepcion: "+ex.getMessage(), "Excepcion");
         }
     }
+
+    
 }

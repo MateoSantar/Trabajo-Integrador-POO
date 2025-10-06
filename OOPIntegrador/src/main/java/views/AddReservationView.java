@@ -183,6 +183,7 @@ public class AddReservationView extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         endDateChooser = new com.toedter.calendar.JDateChooser();
+        adminRoomsBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -220,6 +221,13 @@ public class AddReservationView extends javax.swing.JFrame {
 
         jLabel5.setText("Final:");
 
+        adminRoomsBtn.setText("Administrar Habitaciones");
+        adminRoomsBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                adminRoomsBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -236,7 +244,9 @@ public class AddReservationView extends javax.swing.JFrame {
                         .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ReserveBtn)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(ReserveBtn)
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -252,9 +262,12 @@ public class AddReservationView extends javax.swing.JFrame {
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(reservDateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(endDateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(adminRoomsBtn)
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(endDateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                         .addGap(0, 10, Short.MAX_VALUE)))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(AddUserBtn))))
@@ -278,14 +291,15 @@ public class AddReservationView extends javax.swing.JFrame {
                 .addGap(29, 29, 29)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(roomCategorySelBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(roomCategorySelBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(adminRoomsBtn))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(roomNumberSelBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(27, 27, 27)
                 .addComponent(ReserveBtn)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -369,6 +383,12 @@ public class AddReservationView extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_ReserveBtnActionPerformed
 
+    private void adminRoomsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminRoomsBtnActionPerformed
+        AdminRoomsView arv = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(),this);
+        this.setEnabled(false);
+        arv.setVisible(true);
+    }//GEN-LAST:event_adminRoomsBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -377,6 +397,7 @@ public class AddReservationView extends javax.swing.JFrame {
     private javax.swing.JButton AddUserBtn;
     private java.awt.TextField NewClientTxtField;
     private javax.swing.JButton ReserveBtn;
+    private javax.swing.JButton adminRoomsBtn;
     private com.toedter.calendar.JDateChooser endDateChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

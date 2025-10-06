@@ -18,10 +18,9 @@ public class SQLConnector implements DBConnector {
         Connection conn;
         try{
             conn = DriverManager.getConnection(URL,USER,PASSWORD);
-            JOptionPane.showMessageDialog(null, "Conexion establecida como "+USER, "Conexion exitosa", JOptionPane.INFORMATION_MESSAGE);
             return conn;
         }catch(SQLException ex){
-            JOptionPane.showMessageDialog(null,"Ocurrio un error en la conexion","Error",JOptionPane.ERROR_MESSAGE);
+            Utils.ShowErr("Error en la conexion: "+ex.getMessage(), "Error");
             return null;
         }
         

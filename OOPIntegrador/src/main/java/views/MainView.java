@@ -151,7 +151,6 @@ public class MainView extends javax.swing.JFrame {
         setTitle("Main View");
         setResizable(false);
 
-        deleteBtn.setForeground(new java.awt.Color(0, 0, 0));
         deleteBtn.setText("Eliminar");
         deleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -159,7 +158,6 @@ public class MainView extends javax.swing.JFrame {
             }
         });
 
-        reserveBtn.setForeground(new java.awt.Color(0, 0, 0));
         reserveBtn.setText("Reservar");
         reserveBtn.setToolTipText("Agrega una reserva");
         reserveBtn.setOpaque(true);
@@ -169,6 +167,7 @@ public class MainView extends javax.swing.JFrame {
             }
         });
 
+        reservationsTable.setAutoCreateRowSorter(true);
         reservationsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null},
@@ -213,15 +212,13 @@ public class MainView extends javax.swing.JFrame {
         searchFactorComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ID", "Categoria", "Cliente" }));
         searchFactorComboBox.setToolTipText("");
 
-        searchBtn.setForeground(new java.awt.Color(0, 0, 0));
-        searchBtn.setText("Buscar");
+        searchBtn.setText("Listar");
         searchBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 searchBtnActionPerformed(evt);
             }
         });
 
-        updateBtn.setForeground(new java.awt.Color(0, 0, 0));
         updateBtn.setText("Actualizar");
         updateBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -350,7 +347,6 @@ public class MainView extends javax.swing.JFrame {
             Utils.ShowInfo("No se encontro una reserva con ese ID");
             return;
         }
-        Utils.ShowInfo(Arrays.deepToString(foundRow));
         String[] columnsNames = new String[columnCount];
         for (int i = 0; i < columnCount; i++) {
             columnsNames[i] = model.getColumnName(i);
