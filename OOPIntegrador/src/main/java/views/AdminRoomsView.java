@@ -10,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import models.ReservationDao;
 import models.Room;
 import models.RoomDao;
+import models.Utils;
 
 /**
  *
@@ -20,12 +21,12 @@ public class AdminRoomsView extends javax.swing.JFrame {
     /**
      * Creates new form AddRoomView
      */
-    
-    private ReservationDao reservs;
-    private RoomDao rooms;
-    private DefaultTableModel mainTable;
-    private AddReservationView arv;
-    public AdminRoomsView(ReservationDao reservs,RoomDao rooms,DefaultTableModel mainTable, AddReservationView arv) {
+    private final ReservationDao reservs;
+    private final RoomDao rooms;
+    private final DefaultTableModel mainTable;
+    private final AddReservationView arv;
+
+    public AdminRoomsView(ReservationDao reservs, RoomDao rooms, DefaultTableModel mainTable, AddReservationView arv) {
         initComponents();
         this.reservs = reservs;
         this.rooms = rooms;
@@ -34,6 +35,8 @@ public class AdminRoomsView extends javax.swing.JFrame {
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowClosingEvent();
         loadRooms();
+        Utils.centerWindow(this);
+
     }
 
     /**
@@ -46,15 +49,16 @@ public class AdminRoomsView extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        roomsTable = new javax.swing.JTable();
         addRoomBtn = new javax.swing.JButton();
         editRoomBtn = new javax.swing.JButton();
         removeRoomBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
-        jTable1.setAutoCreateRowSorter(true);
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        roomsTable.setAutoCreateRowSorter(true);
+        roomsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -77,15 +81,16 @@ public class AdminRoomsView extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setColumnSelectionAllowed(true);
-        jTable1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(jTable1);
-        jTable1.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
-            jTable1.getColumnModel().getColumn(1).setResizable(false);
-            jTable1.getColumnModel().getColumn(2).setResizable(false);
-            jTable1.getColumnModel().getColumn(3).setResizable(false);
+        roomsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        roomsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        roomsTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(roomsTable);
+        roomsTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        if (roomsTable.getColumnModel().getColumnCount() > 0) {
+            roomsTable.getColumnModel().getColumn(0).setResizable(false);
+            roomsTable.getColumnModel().getColumn(1).setResizable(false);
+            roomsTable.getColumnModel().getColumn(2).setResizable(false);
+            roomsTable.getColumnModel().getColumn(3).setResizable(false);
         }
 
         addRoomBtn.setText("Nueva");
@@ -136,8 +141,8 @@ public class AdminRoomsView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void loadRooms(){
-        DefaultTableModel roomTable = (DefaultTableModel)this.jTable1.getModel();
+    private void loadRooms() {
+        DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();
         for (Room r : rooms.getAll()) {
             Object[] actRoom = new Object[4];
             actRoom[0] = r.getID();
@@ -147,7 +152,7 @@ public class AdminRoomsView extends javax.swing.JFrame {
             roomTable.addRow(actRoom);
         }
     }
-    
+
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
             @Override
@@ -159,23 +164,53 @@ public class AdminRoomsView extends javax.swing.JFrame {
         });
     }
     private void editRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editRoomBtnActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = roomsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            Utils.ShowInfo("Seleccione una habitación");
+            return;
+        }
+        addRoomView arv = new addRoomView(rooms, this);
+        DefaultTableModel roomTableModel = (DefaultTableModel) roomsTable.getModel();
+        Object[] actualRoom = new Object[4];
+        for (int i = 0; i < roomTableModel.getColumnCount(); i++) {
+            actualRoom[i] = roomTableModel.getValueAt(selectedRow, i);
+        }
+        int actualRoomId = (int) actualRoom[0];
+        int actualRoomNumber = (int) actualRoom[1];
+        String actualRoomCategory = (String) actualRoom[2];
+        double actualRoomPrice = (double) actualRoom[3];
+        arv.fillFieldsOnEdit(new Room(actualRoomId,actualRoomCategory,actualRoomPrice,actualRoomNumber)); //COMPLETAR VERIFICACIONES
+        this.setEnabled(false);
+        arv.setVisible(true);
     }//GEN-LAST:event_editRoomBtnActionPerformed
 
     private void addRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRoomBtnActionPerformed
-        // TODO add your handling code here:
+        addRoomView arv = new addRoomView(rooms, this);
+        this.setEnabled(false);
+        arv.setVisible(true);
     }//GEN-LAST:event_addRoomBtnActionPerformed
 
+    public void addRoom(Room r) {
+        DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();
+        Object[] actRoom = new Object[4];
+
+        actRoom[0] = r.getID();
+        actRoom[1] = r.getRoomNumber();
+        actRoom[2] = r.getCategory();
+        actRoom[3] = r.getPrice();
+        roomTable.addRow(actRoom);
+        arv.resetRoomNumbersMap();
+    }
     /**
      * @param args the command line arguments
      */
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addRoomBtn;
     private javax.swing.JButton editRoomBtn;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JButton removeRoomBtn;
+    private javax.swing.JTable roomsTable;
     // End of variables declaration//GEN-END:variables
 }

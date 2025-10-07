@@ -1,5 +1,8 @@
 package models;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -36,5 +39,11 @@ public class Utils {
         }
 
         return newModel;
+    }
+    public static void centerWindow(JFrame window) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screenSize.width - window.getWidth()) / 2;
+        int y = (screenSize.height - window.getHeight()) / 2;
+        window.setLocation(x, y);
     }
 }

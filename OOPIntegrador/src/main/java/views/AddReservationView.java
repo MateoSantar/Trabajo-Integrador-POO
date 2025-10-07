@@ -24,6 +24,7 @@ import models.Reservation;
 import models.ReservationDao;
 import models.Room;
 import models.RoomDao;
+import models.Utils;
 
 /**
  *
@@ -90,6 +91,7 @@ public class AddReservationView extends javax.swing.JFrame {
         addWindowClosingEvent();
         assignRoomNumbersMap();
         completeSelectors(data);
+        Utils.centerWindow(this);
 
     }
 
@@ -120,6 +122,7 @@ public class AddReservationView extends javax.swing.JFrame {
         ArrayList<Reservation> reservations = (ArrayList<Reservation>) reservDao.getAll();
         ArrayList<Integer> roomsOcupied = new ArrayList<>();
         ArrayList<Room> roomsDesocupied = new ArrayList<>();
+        roomNumberSelBox.removeAllItems();
 
         for (Reservation r : reservations) {
             roomsOcupied.add(r.getRoomNumber());
@@ -148,6 +151,9 @@ public class AddReservationView extends javax.swing.JFrame {
 
     public void setClientName(String nombre) {
         this.NewClientTxtField.setText(nombre);
+    }
+    public void resetRoomNumbersMap(){
+        this.assignRoomNumbersMap();
     }
 
     private void addWindowClosingEvent() {
@@ -186,6 +192,7 @@ public class AddReservationView extends javax.swing.JFrame {
         adminRoomsBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         roomCategorySelBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Standard", "Superior", "Suite" }));
         roomCategorySelBox.setActionCommand("selectRoom");

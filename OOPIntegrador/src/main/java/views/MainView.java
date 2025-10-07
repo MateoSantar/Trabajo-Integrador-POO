@@ -46,7 +46,7 @@ public class MainView extends javax.swing.JFrame {
         initComponents();
         removeDefaultRows();
         loadReservations();
-        centerWindow(this);
+        Utils.centerWindow(this);
 
     }
 
@@ -54,12 +54,7 @@ public class MainView extends javax.swing.JFrame {
      *
      * @param window
      */
-    public static void centerWindow(JFrame window) {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (screenSize.width - window.getWidth()) / 2;
-        int y = (screenSize.height - window.getHeight()) / 2;
-        window.setLocation(x, y);
-    }
+    
 
     private void loadReservations() {
         DefaultTableModel model = (DefaultTableModel) reservationsTable.getModel();

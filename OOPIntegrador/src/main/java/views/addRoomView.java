@@ -4,6 +4,12 @@
  */
 package views;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import models.Room;
+import models.RoomDao;
+import models.Utils;
+
 /**
  *
  * @author idra1
@@ -13,8 +19,18 @@ public class addRoomView extends javax.swing.JFrame {
     /**
      * Creates new form addRoomView
      */
-    public addRoomView() {
+    private final RoomDao rooms;
+    private final AdminRoomsView arv;
+    private boolean isEdit = false;
+
+    public addRoomView(RoomDao rooms, AdminRoomsView arv) {
         initComponents();
+        this.rooms = rooms;
+        this.arv = arv;
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowClosingEvent();
+        Utils.centerWindow(this);
+
     }
 
     /**
@@ -26,19 +42,16 @@ public class addRoomView extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
         addRoomButton = new javax.swing.JButton();
-        newRoomPriceText = new javax.swing.JTextField();
+        newRoomPriceTxt = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         newRoomNumberTxt = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         newRoomCategoryCombo = new javax.swing.JComboBox<>();
 
-        jScrollPane1.setViewportView(jTree1);
-
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         addRoomButton.setText("Añadir ");
         addRoomButton.addActionListener(new java.awt.event.ActionListener() {
@@ -60,23 +73,25 @@ public class addRoomView extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(newRoomCategoryCombo, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(jLabel2))
-                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(newRoomPriceText, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
-                    .addComponent(addRoomButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(newRoomNumberTxt))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addGap(21, 21, 21)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(newRoomPriceTxt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
+                        .addComponent(newRoomNumberTxt, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(newRoomCategoryCombo, javax.swing.GroupLayout.Alignment.LEADING, 0, 93, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGap(3, 3, 3)
+                            .addComponent(jLabel2))
+                        .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(addRoomButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(4, 4, 4)
+                .addGap(22, 22, 22)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(newRoomNumberTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -87,33 +102,70 @@ public class addRoomView extends javax.swing.JFrame {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(newRoomPriceText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(newRoomPriceTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(addRoomButton)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void addRoomButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRoomButtonActionPerformed
-        
+
+        if (newRoomNumberTxt.getText().isBlank() || newRoomPriceTxt.getText().isBlank()) {
+            Utils.ShowInfo("Complete todos los campos");
+            return;
+        }
+        double price;
+        int roomNum;
+        try {
+            price = Double.parseDouble(newRoomPriceTxt.getText());
+            roomNum = Integer.parseInt(newRoomNumberTxt.getText());
+        } catch (NumberFormatException ex) {
+            Utils.ShowErr("Los campos deben ser numericos", "Excepcion");
+            return;
+        }
+        if (rooms.getAll().stream().anyMatch(r -> r.getRoomNumber() == roomNum)) {
+            Utils.ShowInfo("Ya existe una habitacion con el número " + roomNum);
+            return;
+        }
+        Room r = new Room(-1, newRoomCategoryCombo.getSelectedItem().toString(), price, roomNum);
+        rooms.save(r);
+        arv.addRoom(r);
+        arv.setEnabled(true);
         this.dispose();
+
     }//GEN-LAST:event_addRoomButtonActionPerformed
 
+    private void addWindowClosingEvent() {
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                arv.setEnabled(true);
+                dispose();
+
+            }
+        });
+    }
+
+    public void fillFieldsOnEdit(Room r) {
+        newRoomNumberTxt.setText(String.valueOf(r.getRoomNumber()));
+        newRoomPriceTxt.setText(String.valueOf(r.getPrice()));
+        newRoomCategoryCombo.setSelectedItem(r.getCategory());
+        this.isEdit = true;
+    }
     /**
      * @param args the command line arguments
      */
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addRoomButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree jTree1;
     private javax.swing.JComboBox<String> newRoomCategoryCombo;
     private javax.swing.JTextField newRoomNumberTxt;
-    private javax.swing.JTextField newRoomPriceText;
+    private javax.swing.JTextField newRoomPriceTxt;
     // End of variables declaration//GEN-END:variables
 }
