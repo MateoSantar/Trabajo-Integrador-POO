@@ -7,6 +7,9 @@ package views;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.table.DefaultTableModel;
+import models.Client;
+import models.ClientDao;
+import models.Reservation;
 import models.ReservationDao;
 import models.Room;
 import models.RoomDao;
@@ -14,7 +17,7 @@ import models.Utils;
 
 /**
  *
- * @author idra1
+ * @author Mateo Santarsiero
  */
 public class AdminRoomsView extends javax.swing.JFrame {
 
@@ -25,13 +28,15 @@ public class AdminRoomsView extends javax.swing.JFrame {
     private final RoomDao rooms;
     private final DefaultTableModel mainTable;
     private final AddReservationView arv;
+    private final ClientDao clients;
 
-    public AdminRoomsView(ReservationDao reservs, RoomDao rooms, DefaultTableModel mainTable, AddReservationView arv) {
+    public AdminRoomsView(ReservationDao reservs, RoomDao rooms, DefaultTableModel mainTable, AddReservationView arv, ClientDao clients) {
         initComponents();
         this.reservs = reservs;
         this.rooms = rooms;
         this.mainTable = mainTable;
         this.arv = arv;
+        this.clients = clients;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowClosingEvent();
         loadRooms();
@@ -108,6 +113,11 @@ public class AdminRoomsView extends javax.swing.JFrame {
         });
 
         removeRoomBtn.setText("Eliminar");
+        removeRoomBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeRoomBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -179,7 +189,13 @@ public class AdminRoomsView extends javax.swing.JFrame {
         int actualRoomNumber = (int) actualRoom[1];
         String actualRoomCategory = (String) actualRoom[2];
         double actualRoomPrice = (double) actualRoom[3];
-        arv.fillFieldsOnEdit(new Room(actualRoomId,actualRoomCategory,actualRoomPrice,actualRoomNumber)); //COMPLETAR VERIFICACIONES
+        Reservation notAvailableRoom = reservs.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElse(null);
+        if (notAvailableRoom != null) {
+            Client notAvailableRoomClient = clients.getAll().stream().filter(c -> notAvailableRoom.getIdClient() == c.getID()).findFirst().orElse(null);
+            Utils.ShowErr("Error: Habitacion asignada a "+notAvailableRoomClient.getName(), actualRoomCategory);
+            return;
+        }
+        arv.fillFieldsOnEdit(new Room(actualRoomId, actualRoomCategory, actualRoomPrice, actualRoomNumber)); //COMPLETAR VERIFICACIONES
         this.setEnabled(false);
         arv.setVisible(true);
     }//GEN-LAST:event_editRoomBtnActionPerformed
@@ -189,6 +205,33 @@ public class AdminRoomsView extends javax.swing.JFrame {
         this.setEnabled(false);
         arv.setVisible(true);
     }//GEN-LAST:event_addRoomBtnActionPerformed
+
+    private void removeRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRoomBtnActionPerformed
+        int selectedRow = roomsTable.getSelectedRow();
+        DefaultTableModel table = (DefaultTableModel) roomsTable.getModel();
+        if (selectedRow == -1) {
+            Utils.ShowInfo("Seleccione una habitación");
+            return;
+        }
+        DefaultTableModel roomTableModel = (DefaultTableModel) roomsTable.getModel();
+        Object[] actualRoom = new Object[4];
+        for (int i = 0; i < roomTableModel.getColumnCount(); i++) {
+            actualRoom[i] = roomTableModel.getValueAt(selectedRow, i);
+        }
+        int actualRoomNumber = (int) actualRoom[1];
+        String actualRoomCategory = (String) actualRoom[2];
+        Reservation notAvailableRoom = reservs.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElse(null);
+        if (notAvailableRoom != null) {
+            Client notAvailableRoomClient = clients.getAll().stream().filter(c -> notAvailableRoom.getIdClient() == c.getID()).findFirst().orElse(null);
+            Utils.ShowErr("Error: Habitacion asignada a "+notAvailableRoomClient.getName(), actualRoomCategory);
+            return;
+        }
+        Room roomToDelete = rooms.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElse(null);
+        if (roomToDelete != null) {
+            rooms.delete(roomToDelete);
+            table.removeRow(selectedRow);
+        }
+    }//GEN-LAST:event_removeRoomBtnActionPerformed
 
     public void addRoom(Room r) {
         DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();

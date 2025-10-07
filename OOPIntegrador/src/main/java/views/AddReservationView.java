@@ -9,12 +9,10 @@ import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -391,7 +389,7 @@ public class AddReservationView extends javax.swing.JFrame {
     }//GEN-LAST:event_ReserveBtnActionPerformed
 
     private void adminRoomsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminRoomsBtnActionPerformed
-        AdminRoomsView arv = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(),this);
+        AdminRoomsView arv = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(),this,clientDao);
         this.setEnabled(false);
         arv.setVisible(true);
     }//GEN-LAST:event_adminRoomsBtnActionPerformed

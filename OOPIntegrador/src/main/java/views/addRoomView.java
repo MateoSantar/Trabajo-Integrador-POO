@@ -22,7 +22,7 @@ public class addRoomView extends javax.swing.JFrame {
     private final RoomDao rooms;
     private final AdminRoomsView arv;
     private boolean isEdit = false;
-
+    private int editRoomId;
     public addRoomView(RoomDao rooms, AdminRoomsView arv) {
         initComponents();
         this.rooms = rooms;
@@ -153,6 +153,7 @@ public class addRoomView extends javax.swing.JFrame {
         newRoomNumberTxt.setText(String.valueOf(r.getRoomNumber()));
         newRoomPriceTxt.setText(String.valueOf(r.getPrice()));
         newRoomCategoryCombo.setSelectedItem(r.getCategory());
+        editRoomId = r.getID();
         this.isEdit = true;
     }
     /**

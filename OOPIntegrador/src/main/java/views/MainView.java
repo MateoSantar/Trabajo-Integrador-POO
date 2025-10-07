@@ -4,17 +4,8 @@
  */
 package views;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import models.*;
@@ -290,7 +281,7 @@ public class MainView extends javax.swing.JFrame {
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         int selectedRow = reservationsTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "Seleccione una reserva");
+            Utils.ShowInfo("Seleccione una reserva");
             return;
         }
         DefaultTableModel dtm = (DefaultTableModel) reservationsTable.getModel();
