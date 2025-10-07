@@ -6,6 +6,7 @@ package views;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.NoSuchElementException;
 import javax.swing.table.DefaultTableModel;
 import models.Client;
 import models.ClientDao;
@@ -60,6 +61,7 @@ public class AdminRoomsView extends javax.swing.JFrame {
         removeRoomBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Room Admin");
         setResizable(false);
 
         roomsTable.setAutoCreateRowSorter(true);
@@ -86,6 +88,7 @@ public class AdminRoomsView extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        roomsTable.setColumnSelectionAllowed(true);
         roomsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         roomsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         roomsTable.getTableHeader().setReorderingAllowed(false);
@@ -151,8 +154,9 @@ public class AdminRoomsView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void loadRooms() {
+    public final void loadRooms() {
         DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();
+        roomTable.setRowCount(0);
         for (Room r : rooms.getAll()) {
             Object[] actRoom = new Object[4];
             actRoom[0] = r.getID();
@@ -179,25 +183,24 @@ public class AdminRoomsView extends javax.swing.JFrame {
             Utils.ShowInfo("Seleccione una habitación");
             return;
         }
-        addRoomView arv = new addRoomView(rooms, this);
         DefaultTableModel roomTableModel = (DefaultTableModel) roomsTable.getModel();
-        Object[] actualRoom = new Object[4];
-        for (int i = 0; i < roomTableModel.getColumnCount(); i++) {
-            actualRoom[i] = roomTableModel.getValueAt(selectedRow, i);
-        }
-        int actualRoomId = (int) actualRoom[0];
-        int actualRoomNumber = (int) actualRoom[1];
-        String actualRoomCategory = (String) actualRoom[2];
-        double actualRoomPrice = (double) actualRoom[3];
+
+        int actualRoomNumber = (int) roomTableModel.getValueAt(selectedRow, 1);
         Reservation notAvailableRoom = reservs.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElse(null);
         if (notAvailableRoom != null) {
             Client notAvailableRoomClient = clients.getAll().stream().filter(c -> notAvailableRoom.getIdClient() == c.getID()).findFirst().orElse(null);
-            Utils.ShowErr("Error: Habitacion asignada a "+notAvailableRoomClient.getName(), actualRoomCategory);
+            Utils.ShowErr("Error: Habitacion asignada a " + notAvailableRoomClient.getName(), "Habitacion ya asignada");
             return;
         }
-        arv.fillFieldsOnEdit(new Room(actualRoomId, actualRoomCategory, actualRoomPrice, actualRoomNumber)); //COMPLETAR VERIFICACIONES
-        this.setEnabled(false);
-        arv.setVisible(true);
+
+        try {
+            addRoomView arv = new addRoomView(rooms, this, rooms.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElseThrow());
+            this.setEnabled(false);
+            arv.setVisible(true);
+        } catch (NoSuchElementException ex) {
+            Utils.ShowErr("Excepcion al editar habitacion: " + ex.getMessage(), "Excepcion");
+        }
+
     }//GEN-LAST:event_editRoomBtnActionPerformed
 
     private void addRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRoomBtnActionPerformed
@@ -223,7 +226,7 @@ public class AdminRoomsView extends javax.swing.JFrame {
         Reservation notAvailableRoom = reservs.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElse(null);
         if (notAvailableRoom != null) {
             Client notAvailableRoomClient = clients.getAll().stream().filter(c -> notAvailableRoom.getIdClient() == c.getID()).findFirst().orElse(null);
-            Utils.ShowErr("Error: Habitacion asignada a "+notAvailableRoomClient.getName(), actualRoomCategory);
+            Utils.ShowErr("Error: Habitacion asignada a " + notAvailableRoomClient.getName(), actualRoomCategory);
             return;
         }
         Room roomToDelete = rooms.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElse(null);
@@ -242,7 +245,7 @@ public class AdminRoomsView extends javax.swing.JFrame {
         actRoom[2] = r.getCategory();
         actRoom[3] = r.getPrice();
         roomTable.addRow(actRoom);
-        arv.resetRoomNumbersMap();
+        arv.reassignActualRoomSelNumber();
     }
     /**
      * @param args the command line arguments

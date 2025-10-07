@@ -54,5 +54,19 @@ public class Room {
     public void setPrice(double price) {
         this.price = price;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Room{");
+        sb.append("ID=").append(ID);
+        sb.append(", category=").append(category);
+        sb.append(", price=").append(price);
+        sb.append(", roomNumber=").append(roomNumber);
+        sb.append('}');
+        return sb.toString();
+    }
+    
+    
     
 }

@@ -21,13 +21,33 @@ public class addRoomView extends javax.swing.JFrame {
      */
     private final RoomDao rooms;
     private final AdminRoomsView arv;
-    private boolean isEdit = false;
-    private int editRoomId;
-    public addRoomView(RoomDao rooms, AdminRoomsView arv) {
+    private int editRoomId = -1;
+    private Room actualRoom;
+
+    public addRoomView(RoomDao rooms, AdminRoomsView arv) { //Constructor de agregado
         initComponents();
         this.rooms = rooms;
         this.arv = arv;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addRoomButton.addActionListener(e -> addRoomActionPerformed());
+        addWindowClosingEvent();
+        Utils.centerWindow(this);
+
+    }
+
+    public addRoomView(RoomDao rooms, AdminRoomsView arv, Room actualRoom) { //Constructor de edicion
+        initComponents();
+        this.rooms = rooms;
+        this.arv = arv;
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addRoomButton.setText("Aplicar");
+        newRoomNumberTxt.setText(String.valueOf(actualRoom.getRoomNumber()));
+        newRoomNumberTxt.setEnabled(false);
+        newRoomCategoryCombo.setSelectedItem(actualRoom.getCategory());
+        newRoomPriceTxt.setText(String.valueOf(actualRoom.getPrice()));
+        editRoomId = actualRoom.getID();
+        this.actualRoom = actualRoom;
+        addRoomButton.addActionListener(e -> editRoomActionPerformed());
         addWindowClosingEvent();
         Utils.centerWindow(this);
 
@@ -51,14 +71,10 @@ public class addRoomView extends javax.swing.JFrame {
         newRoomCategoryCombo = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Room Add");
         setResizable(false);
 
         addRoomButton.setText("Añadir ");
-        addRoomButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addRoomButtonActionPerformed(evt);
-            }
-        });
 
         jLabel3.setText("Precio");
 
@@ -111,8 +127,7 @@ public class addRoomView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void addRoomButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRoomButtonActionPerformed
-
+    private void addRoomActionPerformed() {
         if (newRoomNumberTxt.getText().isBlank() || newRoomPriceTxt.getText().isBlank()) {
             Utils.ShowInfo("Complete todos los campos");
             return;
@@ -130,13 +145,39 @@ public class addRoomView extends javax.swing.JFrame {
             Utils.ShowInfo("Ya existe una habitacion con el número " + roomNum);
             return;
         }
+
         Room r = new Room(-1, newRoomCategoryCombo.getSelectedItem().toString(), price, roomNum);
         rooms.save(r);
         arv.addRoom(r);
         arv.setEnabled(true);
         this.dispose();
+    }
 
-    }//GEN-LAST:event_addRoomButtonActionPerformed
+    private void editRoomActionPerformed() {
+        if (newRoomNumberTxt.getText().isBlank() || newRoomPriceTxt.getText().isBlank()) {
+            Utils.ShowInfo("Complete todos los campos");
+            return;
+        }
+        double price;
+        int roomNum;
+        try {
+            price = Double.parseDouble(newRoomPriceTxt.getText());
+            roomNum = Integer.parseInt(newRoomNumberTxt.getText());
+        } catch (NumberFormatException ex) {
+            Utils.ShowErr("Los campos deben ser numericos", "Excepcion");
+            return;
+        }
+        if (rooms.getAll().stream().anyMatch(r -> r.getRoomNumber() == roomNum) && roomNum != actualRoom.getRoomNumber()) {
+            Utils.ShowInfo("Ya existe una habitacion con el número " + roomNum);
+            return;
+        }
+        Room newRoom = new Room(editRoomId,newRoomCategoryCombo.getSelectedItem().toString(),price,roomNum);
+        rooms.update(actualRoom, newRoom);
+        arv.loadRooms();
+        
+        arv.setEnabled(true);
+        this.dispose();
+    }
 
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
@@ -149,13 +190,6 @@ public class addRoomView extends javax.swing.JFrame {
         });
     }
 
-    public void fillFieldsOnEdit(Room r) {
-        newRoomNumberTxt.setText(String.valueOf(r.getRoomNumber()));
-        newRoomPriceTxt.setText(String.valueOf(r.getPrice()));
-        newRoomCategoryCombo.setSelectedItem(r.getCategory());
-        editRoomId = r.getID();
-        this.isEdit = true;
-    }
     /**
      * @param args the command line arguments
      */

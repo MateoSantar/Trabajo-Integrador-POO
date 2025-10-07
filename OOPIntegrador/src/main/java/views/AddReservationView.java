@@ -9,10 +9,9 @@ import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -34,7 +33,7 @@ public class AddReservationView extends javax.swing.JFrame {
      * Creates new form AddReservationView
      */
     private boolean isInsert = false;
-    private JTable table;
+    private final JTable table;
     private final MainView mainView;
     private final HashMap<String, ArrayList<Integer>> roomNumbers = new HashMap<>();
     private final RoomDao roomDao;
@@ -42,6 +41,7 @@ public class AddReservationView extends javax.swing.JFrame {
     private Room actualRoom;
     private String actualCategory;
     private final ClientDao clientDao;
+    private int ActualRoomSelNumber;
 
     /**
      *
@@ -108,7 +108,7 @@ public class AddReservationView extends javax.swing.JFrame {
             reservDateChooser.setDate(sdf.parse(map.get("date")));
             endDateChooser.setDate(sdf.parse(map.get("endDate")));
         } catch (ParseException ex) {
-            Logger.getLogger(AddReservationView.class.getName()).log(Level.SEVERE, null, ex);
+            Utils.ShowErr("Excepcion: " + ex.getMessage(), "Excepcion");
             return;
         }
         roomCategorySelBox.setSelectedItem(map.get("category"));
@@ -116,12 +116,11 @@ public class AddReservationView extends javax.swing.JFrame {
     }
 
     private void assignRoomNumbersMap() {
+        roomNumberSelBox.removeAllItems();
         ArrayList<Room> rooms = (ArrayList<Room>) roomDao.getAll();
         ArrayList<Reservation> reservations = (ArrayList<Reservation>) reservDao.getAll();
         ArrayList<Integer> roomsOcupied = new ArrayList<>();
         ArrayList<Room> roomsDesocupied = new ArrayList<>();
-        roomNumberSelBox.removeAllItems();
-
         for (Reservation r : reservations) {
             roomsOcupied.add(r.getRoomNumber());
         }
@@ -145,13 +144,11 @@ public class AddReservationView extends javax.swing.JFrame {
             }
             roomNumberSelBox.setSelectedIndex(0);
         }
+
     }
 
     public void setClientName(String nombre) {
         this.NewClientTxtField.setText(nombre);
-    }
-    public void resetRoomNumbersMap(){
-        this.assignRoomNumbersMap();
     }
 
     private void addWindowClosingEvent() {
@@ -190,6 +187,7 @@ public class AddReservationView extends javax.swing.JFrame {
         adminRoomsBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Añadido de Reserva");
         setResizable(false);
 
         roomCategorySelBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Standard", "Superior", "Suite" }));
@@ -335,12 +333,13 @@ public class AddReservationView extends javax.swing.JFrame {
         }
         ArrayList<Integer> roomsAvailable = roomNumbers.get(roomCategorySelBox.getSelectedItem().toString());
         if (roomsAvailable != null) {
-            for (Integer roomAvailable : roomsAvailable) {
+            for (Integer roomAvailable : roomsAvailable ) {
                 roomNumberSelBox.addItem(String.valueOf(roomAvailable));
             }
         } else {
             JOptionPane.showMessageDialog(null, "No hay habitaciones disponibles");
         }
+        Utils.ShowInfo(Arrays.deepToString(roomsAvailable.toArray()));
     }//GEN-LAST:event_roomCategorySelBoxActionPerformed
 
     private void AddUserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddUserBtnActionPerformed
@@ -359,12 +358,12 @@ public class AddReservationView extends javax.swing.JFrame {
 
     private void ReserveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReserveBtnActionPerformed
         if (NewClientTxtField == null || reservDateChooser.getDate() == null || endDateChooser.getDate() == null || roomNumberSelBox.getSelectedItem() == null || roomNumberSelBox.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Complete los datos");
+            Utils.ShowInfo("Complete los datos");
             return;
         }
         int clientId = getIdByName();
         if (clientId == -1) {
-            JOptionPane.showMessageDialog(null, "No existe el cliente");
+            Utils.ShowInfo("No existe el cliente");
             return;
         }
 
@@ -386,14 +385,23 @@ public class AddReservationView extends javax.swing.JFrame {
         mainView.reloadReservations();
         mainView.setEnabled(true);
         this.dispose();
+
     }//GEN-LAST:event_ReserveBtnActionPerformed
 
     private void adminRoomsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminRoomsBtnActionPerformed
-        AdminRoomsView arv = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(),this,clientDao);
+        this.ActualRoomSelNumber = Integer.parseInt(roomNumberSelBox.getSelectedItem().toString());
+        roomNumberSelBox.removeAllItems();
+        AdminRoomsView arv = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(), this, clientDao);
         this.setEnabled(false);
         arv.setVisible(true);
     }//GEN-LAST:event_adminRoomsBtnActionPerformed
 
+    public void reassignActualRoomSelNumber() {
+        roomNumberSelBox.removeAllItems();
+        roomNumbers.clear();
+        assignRoomNumbersMap();
+
+    }
     /**
      * @param args the command line arguments
      */
