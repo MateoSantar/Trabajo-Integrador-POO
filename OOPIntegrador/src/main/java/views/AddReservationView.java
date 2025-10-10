@@ -64,7 +64,10 @@ public class AddReservationView extends javax.swing.JFrame {
         addWindowClosingEvent();
         assignRoomNumbersMap();
         setLocation(700, 450);
-
+        
+        if (roomNumbers.get("Standard") == null) {
+            roomNumberSelBox.setEnabled(false);
+        }
     }
 
     /**
@@ -90,7 +93,9 @@ public class AddReservationView extends javax.swing.JFrame {
         assignRoomNumbersMap();
         completeSelectors(data);
         Utils.centerWindow(this);
-
+        if (roomNumbers.get("Standard") == null) {
+            roomNumberSelBox.setEnabled(false);
+        }
     }
 
     private void completeSelectors(Object[] data) {
@@ -121,6 +126,7 @@ public class AddReservationView extends javax.swing.JFrame {
         ArrayList<Reservation> reservations = (ArrayList<Reservation>) reservDao.getAll();
         ArrayList<Integer> roomsOcupied = new ArrayList<>();
         ArrayList<Room> roomsDesocupied = new ArrayList<>();
+        roomNumbers.clear();
         for (Reservation r : reservations) {
             roomsOcupied.add(r.getRoomNumber());
         }
@@ -333,13 +339,14 @@ public class AddReservationView extends javax.swing.JFrame {
         }
         ArrayList<Integer> roomsAvailable = roomNumbers.get(roomCategorySelBox.getSelectedItem().toString());
         if (roomsAvailable != null) {
-            for (Integer roomAvailable : roomsAvailable ) {
+            roomNumberSelBox.setEnabled(true);
+            for (Integer roomAvailable : roomsAvailable) {
                 roomNumberSelBox.addItem(String.valueOf(roomAvailable));
             }
         } else {
-            JOptionPane.showMessageDialog(null, "No hay habitaciones disponibles");
+            roomNumberSelBox.setEnabled(false);
         }
-        Utils.ShowInfo(Arrays.deepToString(roomsAvailable.toArray()));
+
     }//GEN-LAST:event_roomCategorySelBoxActionPerformed
 
     private void AddUserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddUserBtnActionPerformed
@@ -389,18 +396,13 @@ public class AddReservationView extends javax.swing.JFrame {
     }//GEN-LAST:event_ReserveBtnActionPerformed
 
     private void adminRoomsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminRoomsBtnActionPerformed
-        this.ActualRoomSelNumber = Integer.parseInt(roomNumberSelBox.getSelectedItem().toString());
-        roomNumberSelBox.removeAllItems();
-        AdminRoomsView arv = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(), this, clientDao);
+        AdminRoomsView adminRoomView = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(), this, clientDao,roomNumbers);
         this.setEnabled(false);
-        arv.setVisible(true);
+        adminRoomView.setVisible(true);
     }//GEN-LAST:event_adminRoomsBtnActionPerformed
 
-    public void reassignActualRoomSelNumber() {
-        roomNumberSelBox.removeAllItems();
-        roomNumbers.clear();
-        assignRoomNumbersMap();
-
+    public void resetRoomNumberHashMap(){
+        this.assignRoomNumbersMap();
     }
     /**
      * @param args the command line arguments

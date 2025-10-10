@@ -4,30 +4,36 @@
  */
 package views;
 
+import com.google.protobuf.MapEntry;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import models.Room;
 import models.RoomDao;
 import models.Utils;
 
 /**
  *
- * @author idra1
+ * @author Mateo Santarsiero
  */
-public class addRoomView extends javax.swing.JFrame {
+public class AddRoomView extends javax.swing.JFrame {
 
     /**
-     * Creates new form addRoomView
+     * Creates new form AddRoomView
      */
     private final RoomDao rooms;
-    private final AdminRoomsView arv;
+    private final AdminRoomsView adminRoomView;
     private int editRoomId = -1;
     private Room actualRoom;
+    private HashMap<String, ArrayList<Integer>> roomNumbers = new HashMap<>();
 
-    public addRoomView(RoomDao rooms, AdminRoomsView arv) { //Constructor de agregado
+    public AddRoomView(RoomDao rooms, AdminRoomsView arv, HashMap<String, ArrayList<Integer>> roomNumbers) { //Constructor de agregado
         initComponents();
         this.rooms = rooms;
-        this.arv = arv;
+        this.adminRoomView = arv;
+        this.roomNumbers = roomNumbers;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addRoomButton.addActionListener(e -> addRoomActionPerformed());
         addWindowClosingEvent();
@@ -35,10 +41,10 @@ public class addRoomView extends javax.swing.JFrame {
 
     }
 
-    public addRoomView(RoomDao rooms, AdminRoomsView arv, Room actualRoom) { //Constructor de edicion
+    public AddRoomView(RoomDao rooms, AdminRoomsView arv, Room actualRoom, HashMap<String, ArrayList<Integer>> roomNumbers) { //Constructor de edicion
         initComponents();
         this.rooms = rooms;
-        this.arv = arv;
+        this.adminRoomView = arv;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addRoomButton.setText("Aplicar");
         newRoomNumberTxt.setText(String.valueOf(actualRoom.getRoomNumber()));
@@ -47,6 +53,7 @@ public class addRoomView extends javax.swing.JFrame {
         newRoomPriceTxt.setText(String.valueOf(actualRoom.getPrice()));
         editRoomId = actualRoom.getID();
         this.actualRoom = actualRoom;
+        this.roomNumbers = roomNumbers;
         addRoomButton.addActionListener(e -> editRoomActionPerformed());
         addWindowClosingEvent();
         Utils.centerWindow(this);
@@ -148,34 +155,34 @@ public class addRoomView extends javax.swing.JFrame {
 
         Room r = new Room(-1, newRoomCategoryCombo.getSelectedItem().toString(), price, roomNum);
         rooms.save(r);
-        arv.addRoom(r);
-        arv.setEnabled(true);
+        adminRoomView.addRoom(r);
+        adminRoomView.setEnabled(true);
         this.dispose();
     }
 
     private void editRoomActionPerformed() {
-        if (newRoomNumberTxt.getText().isBlank() || newRoomPriceTxt.getText().isBlank()) {
+        double price;
+        int roomNum = actualRoom.getRoomNumber();
+        if (newRoomPriceTxt.getText().isBlank()) {
             Utils.ShowInfo("Complete todos los campos");
             return;
         }
-        double price;
-        int roomNum;
+
         try {
             price = Double.parseDouble(newRoomPriceTxt.getText());
-            roomNum = Integer.parseInt(newRoomNumberTxt.getText());
         } catch (NumberFormatException ex) {
             Utils.ShowErr("Los campos deben ser numericos", "Excepcion");
             return;
         }
-        if (rooms.getAll().stream().anyMatch(r -> r.getRoomNumber() == roomNum) && roomNum != actualRoom.getRoomNumber()) {
-            Utils.ShowInfo("Ya existe una habitacion con el número " + roomNum);
-            return;
-        }
-        Room newRoom = new Room(editRoomId,newRoomCategoryCombo.getSelectedItem().toString(),price,roomNum);
-        rooms.update(actualRoom, newRoom);
-        arv.loadRooms();
         
-        arv.setEnabled(true);
+        
+        Room newRoom = new Room(editRoomId, newRoomCategoryCombo.getSelectedItem().toString(), price, roomNum);
+        
+        
+        rooms.update(actualRoom, newRoom);
+        adminRoomView.loadRooms();
+        adminRoomView.getAddReservationView().resetRoomNumberHashMap();
+        adminRoomView.setEnabled(true);
         this.dispose();
     }
 
@@ -183,7 +190,7 @@ public class addRoomView extends javax.swing.JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                arv.setEnabled(true);
+                adminRoomView.setEnabled(true);
                 dispose();
 
             }

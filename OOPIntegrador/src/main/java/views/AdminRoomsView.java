@@ -1,11 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package views;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import javax.swing.table.DefaultTableModel;
 import models.Client;
@@ -27,17 +25,17 @@ public class AdminRoomsView extends javax.swing.JFrame {
      */
     private final ReservationDao reservs;
     private final RoomDao rooms;
-    private final DefaultTableModel mainTable;
-    private final AddReservationView arv;
+    private final AddReservationView addReservationView;
     private final ClientDao clients;
+    private HashMap<String, ArrayList<Integer>> roomNumbers = new HashMap<>();
 
-    public AdminRoomsView(ReservationDao reservs, RoomDao rooms, DefaultTableModel mainTable, AddReservationView arv, ClientDao clients) {
+    public AdminRoomsView(ReservationDao reservs, RoomDao rooms, DefaultTableModel mainTable, AddReservationView arv, ClientDao clients, HashMap<String, ArrayList<Integer>> roomNumbers ) {
         initComponents();
         this.reservs = reservs;
         this.rooms = rooms;
-        this.mainTable = mainTable;
-        this.arv = arv;
+        this.addReservationView = arv;
         this.clients = clients;
+        this.roomNumbers = roomNumbers;
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowClosingEvent();
         loadRooms();
@@ -166,17 +164,18 @@ public class AdminRoomsView extends javax.swing.JFrame {
             roomTable.addRow(actRoom);
         }
     }
-
+    
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                arv.setEnabled(true);
+                addReservationView.setEnabled(true);
                 dispose();
 
             }
         });
     }
+    
     private void editRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editRoomBtnActionPerformed
         int selectedRow = roomsTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -194,9 +193,9 @@ public class AdminRoomsView extends javax.swing.JFrame {
         }
 
         try {
-            addRoomView arv = new addRoomView(rooms, this, rooms.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElseThrow());
+            AddRoomView addRoomView = new AddRoomView(rooms, this, rooms.getAll().stream().filter(r -> r.getRoomNumber() == actualRoomNumber).findFirst().orElseThrow(),roomNumbers);
             this.setEnabled(false);
-            arv.setVisible(true);
+            addRoomView.setVisible(true);
         } catch (NoSuchElementException ex) {
             Utils.ShowErr("Excepcion al editar habitacion: " + ex.getMessage(), "Excepcion");
         }
@@ -204,9 +203,9 @@ public class AdminRoomsView extends javax.swing.JFrame {
     }//GEN-LAST:event_editRoomBtnActionPerformed
 
     private void addRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRoomBtnActionPerformed
-        addRoomView arv = new addRoomView(rooms, this);
+        AddRoomView addRoomView = new AddRoomView(rooms, this,roomNumbers);
         this.setEnabled(false);
-        arv.setVisible(true);
+        addRoomView.setVisible(true);
     }//GEN-LAST:event_addRoomBtnActionPerformed
 
     private void removeRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRoomBtnActionPerformed
@@ -239,17 +238,22 @@ public class AdminRoomsView extends javax.swing.JFrame {
     public void addRoom(Room r) {
         DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();
         Object[] actRoom = new Object[4];
-
         actRoom[0] = r.getID();
         actRoom[1] = r.getRoomNumber();
         actRoom[2] = r.getCategory();
         actRoom[3] = r.getPrice();
         roomTable.addRow(actRoom);
-        arv.reassignActualRoomSelNumber();
     }
+    
+    
+    
     /**
-     * @param args the command line arguments
+     * @return 
      */
+
+    public AddReservationView getAddReservationView() {
+        return addReservationView;
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
