@@ -4,12 +4,10 @@
  */
 package views;
 
-import com.google.protobuf.MapEntry;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import models.Room;
 import models.RoomDao;
 import models.Utils;

@@ -2,8 +2,6 @@ package views;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JFrame;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import models.Client;
 import models.ClientDao;
@@ -25,6 +23,9 @@ public class AddClientView extends javax.swing.JFrame {
     private final ClientDao clientDao;
     /**
      * Creates new form NewJFrame
+     * @param clientDao
+     * @param arv
+     * @param table
      */
     public AddClientView(ClientDao clientDao, AddReservationView arv, DefaultTableModel table) {
         initComponents();
