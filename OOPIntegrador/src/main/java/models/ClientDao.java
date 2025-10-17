@@ -1,4 +1,3 @@
-
 package models;
 
 import interfaces.Dao;
@@ -11,59 +10,66 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author Mateo Santarsiero
+ * DAO de {@link Client}. Maneja caché y persistencia.
  */
 public class ClientDao implements Dao<Client> {
+    /** Lista en memoria de clientes. */
     private final List<Client> clients = new ArrayList<>();
+    /** Conexión JDBC. */
     private Connection conn;
+
+    /**
+     * Carga clientes desde la BD.
+     * @param conn conexión activa
+     */
     public ClientDao(Connection conn) {
         try {
             this.conn = conn;
             String query = "SELECT * FROM clientes;";
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 int id = rs.getInt("idCliente");
                 String name = rs.getString("nombre");
                 String surName = rs.getString("apellido");
                 String phone = rs.getString("telefono");
-                clients.add(new Client(id,(name+" "+surName),phone));
+                clients.add(new Client(id, (name + " " + surName), phone));
             }
             ps.close();
-            
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error en la obtencion de clientes = "+ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error en la obtencion de clientes = " + ex.getMessage());
         }
-        
     }
 
+    /** @return todos los clientes en caché */
     @Override
-    public List<Client> getAll() {
-        return clients;
-    }
-    
+    public List<Client> getAll() { return clients; }
+
+    /**
+     * Busca por id.
+     * @param id id del cliente
+     * @return cliente o {@code null}
+     */
     @Override
     public Client Get(long id) {
-        for(Client c : clients){
-            if (c.getID() == id) {
-                return c;
-            }
+        for (Client c : clients) {
+            if (c.getID() == id) return c;
         }
-         // <-- En la ventana de busqueda, debe mostrarse el error
         return null;
     }
 
-    
-
+    /**
+     * Guarda en BD y agrega al caché.
+     * @param c cliente nuevo
+     */
     @Override
     public void save(Client c) {
-        try{
+        try {
             String query = "INSERT INTO clientes (nombre,apellido,telefono) VALUES (?,?,?)";
-            PreparedStatement ps = conn.prepareStatement(query,PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
             String[] name = c.getName().split(" ");
             ps.setString(1, name[0]);
-            ps.setString(2, name[1]);
+            ps.setString(2, name.length > 1 ? name[1] : "");
             ps.setString(3, c.getPhone());
             int affectedRow = ps.executeUpdate();
             if (affectedRow > 0) {
@@ -74,13 +80,18 @@ public class ClientDao implements Dao<Client> {
             } else {
                 Utils.ShowErr("Error al guardar nuevo cliente", "Error en guardado");
             }
-            
             ps.close();
-        } catch (SQLException ex){
-            Utils.ShowErr("Excepcion: "+ex.getMessage(), "Excepcion");
+        } catch (SQLException ex) {
+            Utils.ShowErr("Excepcion: " + ex.getMessage(), "Excepcion");
         }
     }
 
+    /**
+     * Reemplaza en caché (no actualiza BD).
+     * @param oldClient a reemplazar
+     * @param newClient nuevo cliente
+     * @return si se reemplazó
+     */
     @Override
     public boolean update(Client oldClient, Client newClient) {
         int index = clients.indexOf(oldClient);
@@ -88,15 +99,16 @@ public class ClientDao implements Dao<Client> {
             clients.set(index, newClient);
             return true;
         }
-        Utils.ShowErr("Error en el update del cliente", "Error"); // <== En ningun momento se deberia utilizar el update de Client, pero ahi esta
+        Utils.ShowErr("Error en el update del cliente", "Error");
         return false;
     }
 
+    /**
+     * Elimina del caché (no borra en BD).
+     * @param c cliente a eliminar
+     */
     @Override
     public void delete(Client c) {
         clients.remove(c);
     }
-    
-    
-    
 }

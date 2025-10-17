@@ -11,15 +11,18 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author Mateo Santarsiero
+ * DAO de {@link Reservation}. Maneja caché y BD.
  */
 public class ReservationDao implements Dao<Reservation> {
-
+    /** Lista en memoria de reservas. */
     private final List<Reservation> reservations = new ArrayList<>();
-
+    /** Conexión JDBC. */
     private Connection conn;
 
+    /**
+     * Carga reservas desde BD.
+     * @param conn conexión activa
+     */
     public ReservationDao(Connection conn) {
         try {
             this.conn = conn;
@@ -35,28 +38,33 @@ public class ReservationDao implements Dao<Reservation> {
                 reservations.add(new Reservation(id, roomNumber, idClient, fecha_inicio, fecha_final));
             }
             ps.close();
-
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error en la obtencion de reservas = " + ex.getMessage());
         }
     }
 
+    /**
+     * Busca por id en caché.
+     * @param id id de reserva
+     * @return reserva o {@code null}
+     */
     @Override
     public Reservation Get(long id) {
         for (Reservation r : reservations) {
-            if (r.getID() == id) {
-                return r;
-            }
+            if (r.getID() == id) return r;
         }
-        System.out.println("No se encontro una reserva"); // <-- En la ventana de busqueda, debe mostrarse el error
+        System.out.println("No se encontro una reserva");
         return null;
     }
 
+    /** @return todas las reservas en caché */
     @Override
-    public List<Reservation> getAll() {
-        return reservations;
-    }
+    public List<Reservation> getAll() { return reservations; }
 
+    /**
+     * Inserta en BD y agrega al caché.
+     * @param r reserva a guardar
+     */
     @Override
     public void save(Reservation r) {
         try {
@@ -66,7 +74,6 @@ public class ReservationDao implements Dao<Reservation> {
             ps.setInt(2, r.getRoomNumber());
             ps.setDate(3, r.getStartDate());
             ps.setDate(4, r.getEndDate());
-
             int affectedRow = ps.executeUpdate();
             if (affectedRow > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
@@ -76,21 +83,23 @@ public class ReservationDao implements Dao<Reservation> {
             } else {
                 Utils.ShowErr("Error al guardar nueva reserva", "Error");
             }
-
             ps.close();
         } catch (SQLException ex) {
             Utils.ShowErr("Excepcion en guardado de reserva: " + ex.getMessage(), "Excepcion");
         }
-
     }
 
+    /**
+     * Actualiza en BD y en caché.
+     * @param oldOne reserva a actualizar
+     * @param newOne datos nuevos
+     * @return si se actualizó
+     */
     @Override
     public boolean update(Reservation oldOne, Reservation newOne) {
         try {
             int index = reservations.indexOf(oldOne);
-            if (index == -1) {
-                return false;
-            }
+            if (index == -1) return false;
 
             String query = "UPDATE reservas SET idCliente = ?, numeroHabitacion = ?, fecha_inicio = ?, fecha_fin = ? WHERE idReserva = ?";
             PreparedStatement ps = conn.prepareStatement(query);
@@ -110,6 +119,10 @@ public class ReservationDao implements Dao<Reservation> {
         return false;
     }
 
+    /**
+     * Elimina en BD y del caché.
+     * @param r reserva a eliminar
+     */
     @Override
     public void delete(Reservation r) {
         try {
@@ -123,5 +136,4 @@ public class ReservationDao implements Dao<Reservation> {
             Utils.ShowErr("Excepcion: " + ex.getMessage(), "Excepcion");
         }
     }
-
 }

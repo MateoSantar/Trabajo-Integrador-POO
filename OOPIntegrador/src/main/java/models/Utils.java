@@ -7,23 +7,35 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author Mateo Santarsiero
+ * Utilidades para Swing y tablas.
  */
 public class Utils {
 
+    /**
+     * Muestra un diálogo de error.
+     * @param err mensaje de error
+     * @param title título del diálogo
+     */
     public static void ShowErr(String err, String title) {
         JOptionPane.showMessageDialog(null, err, title, JOptionPane.ERROR_MESSAGE);
     }
 
+    /**
+     * Muestra un diálogo informativo.
+     * @param info mensaje de información
+     */
     public static void ShowInfo(String info) {
         JOptionPane.showMessageDialog(null, info, "Info", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Clona un {@link DefaultTableModel}.
+     * @param orgModel modelo original
+     * @return nuevo modelo con mismas columnas y filas
+     */
     public static DefaultTableModel cloneModel(DefaultTableModel orgModel) {
         int columnCount = orgModel.getColumnCount();
         Object[] columnNames = new Object[columnCount];
-
         for (int i = 0; i < columnCount; i++) {
             columnNames[i] = orgModel.getColumnName(i);
         }
@@ -37,9 +49,13 @@ public class Utils {
             }
             newModel.addRow(rowData);
         }
-
         return newModel;
     }
+
+    /**
+     * Centra una ventana en la pantalla.
+     * @param window ventana a centrar
+     */
     public static void centerWindow(JFrame window) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - window.getWidth()) / 2;
