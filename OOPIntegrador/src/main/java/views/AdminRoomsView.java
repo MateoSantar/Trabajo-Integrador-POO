@@ -15,20 +15,52 @@ import models.RoomDao;
 import models.Utils;
 
 /**
+ * Ventana de administración de habitaciones. Permite visualizar, agregar,
+ * editar y eliminar habitaciones del sistema.
+ *
+ * Esta vista interactúa con los objetos DAO de {@link RoomDao},
+ * {@link ReservationDao} y {@link ClientDao}, y coordina la relación entre las
+ * habitaciones y las reservas existentes.
  *
  * @author Mateo Santarsiero
  */
 public class AdminRoomsView extends javax.swing.JFrame {
 
     /**
-     * Creates new form AddRoomView
+     * DAO encargado de las reservas.
      */
     private final ReservationDao reservs;
+
+    /**
+     * DAO encargado de las habitaciones.
+     */
     private final RoomDao rooms;
+
+    /**
+     * Vista principal de reservas desde la cual se accedió a esta ventana.
+     */
     private final AddReservationView addReservationView;
+
+    /**
+     * DAO encargado de los clientes.
+     */
     private final ClientDao clients;
+
+    /**
+     * Mapa que asocia categorías de habitación con sus números disponibles.
+     */
     private HashMap<String, ArrayList<Integer>> roomNumbers = new HashMap<>();
 
+    /**
+     * Crea una nueva instancia de la vista de administración de habitaciones.
+     *
+     * @param reservs objeto DAO de reservas
+     * @param rooms objeto DAO de habitaciones
+     * @param mainTable modelo de tabla principal (sin uso directo en esta clase)
+     * @param arv referencia a la vista de agregar reserva
+     * @param clients objeto DAO de clientes
+     * @param roomNumbers mapa de categorías y sus habitaciones disponibles
+     */
     public AdminRoomsView(ReservationDao reservs, RoomDao rooms, DefaultTableModel mainTable, AddReservationView arv, ClientDao clients, HashMap<String, ArrayList<Integer>> roomNumbers ) {
         initComponents();
         this.reservs = reservs;
@@ -152,6 +184,10 @@ public class AdminRoomsView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Carga todas las habitaciones desde la base de datos al {@link JTable} de
+     * la interfaz.
+     */
     public final void loadRooms() {
         DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();
         roomTable.setRowCount(0);
@@ -165,6 +201,10 @@ public class AdminRoomsView extends javax.swing.JFrame {
         }
     }
     
+    /**
+     * Agrega un evento personalizado al cierre de la ventana. Restaura la vista
+     * principal de reservas y libera los recursos.
+     */
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
             @Override
@@ -176,6 +216,12 @@ public class AdminRoomsView extends javax.swing.JFrame {
         });
     }
     
+    /**
+     * Evento del botón "Editar". Permite modificar una habitación seleccionada
+     * siempre que no esté asociada a una reserva existente.
+     *
+     * @param evt evento de acción generado por el botón
+     */
     private void editRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editRoomBtnActionPerformed
         int selectedRow = roomsTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -202,12 +248,24 @@ public class AdminRoomsView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_editRoomBtnActionPerformed
 
+    
+    /**
+     * Evento del botón "Nueva". Abre la ventana para crear una nueva habitación.
+     *
+     * @param evt evento de acción generado por el botón
+     */
     private void addRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRoomBtnActionPerformed
         AddRoomView addRoomView = new AddRoomView(rooms, this,roomNumbers);
         this.setEnabled(false);
         addRoomView.setVisible(true);
     }//GEN-LAST:event_addRoomBtnActionPerformed
 
+    /**
+     * Evento del botón "Eliminar". Elimina la habitación seleccionada si no
+     * está asignada a una reserva.
+     *
+     * @param evt evento de acción generado por el botón
+     */
     private void removeRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRoomBtnActionPerformed
         int selectedRow = roomsTable.getSelectedRow();
         DefaultTableModel table = (DefaultTableModel) roomsTable.getModel();
@@ -235,6 +293,12 @@ public class AdminRoomsView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_removeRoomBtnActionPerformed
 
+    /**
+     * Agrega una nueva habitación al modelo de la tabla visual.
+     *
+     * @param r habitación a agregar
+     */
+
     public void addRoom(Room r) {
         DefaultTableModel roomTable = (DefaultTableModel) this.roomsTable.getModel();
         Object[] actRoom = new Object[4];
@@ -248,7 +312,9 @@ public class AdminRoomsView extends javax.swing.JFrame {
     
     
     /**
-     * @return 
+     * Devuelve la vista de reservas asociada a esta ventana.
+     *
+     * @return instancia de {@link AddReservationView}
      */
 
     public AddReservationView getAddReservationView() {

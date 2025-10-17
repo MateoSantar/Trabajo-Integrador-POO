@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package views;
 
 import java.awt.event.WindowAdapter;
@@ -9,6 +5,7 @@ import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JTable;
@@ -22,33 +19,70 @@ import models.RoomDao;
 import models.Utils;
 
 /**
+ * Ventana para añadir o modificar reservas en el sistema. Permite seleccionar
+ * cliente, habitación, fechas de inicio y fin, así como gestionar las
+ * habitaciones disponibles.
+ *
+ * <p>
+ * Esta clase puede funcionar tanto en modo de inserción (nueva reserva) como en
+ * modo de edición (modificar una reserva existente).
+ * </p>
+ *
+ *
+ *
  *
  * @author Mateo Santarsiero
  */
 public class AddReservationView extends javax.swing.JFrame {
 
     /**
-     * Creates new form AddReservationView
+     * Indica si la vista se utiliza para insertar una nueva reserva o editar
+     * una existente.
      */
     private boolean isInsert = false;
+    /**
+     * Tabla principal de reservas que se actualizará tras una inserción o
+     * edición.
+     */
     private final JTable table;
+    /**
+     * Vista principal desde la cual se abre esta ventana.
+     */
     private final MainView mainView;
+    /**
+     * Mapa que asocia categorías de habitaciones con sus números disponibles.
+     */
     private final HashMap<String, ArrayList<Integer>> roomNumbers = new HashMap<>();
+    /**
+     * DAO para acceso a los datos de habitaciones.
+     */
     private final RoomDao roomDao;
+    /**
+     * DAO para acceso a los datos de reservas.
+     */
     private final ReservationDao reservDao;
+    /**
+     * Habitación actualmente seleccionada (en modo edición).
+     */
     private Room actualRoom;
+    /**
+     * Categoría de la habitación actualmente seleccionada (en modo edición).
+     */
     private String actualCategory;
+    /**
+     * DAO para acceso a los datos de clientes.
+     */
     private final ClientDao clientDao;
-    private int ActualRoomSelNumber;
 
     /**
+     * Crea una nueva instancia de AddReservationView para insertar una reserva.
      *
-     * @param isInsert
-     * @param table
-     * @param mainView
-     * @param dao
-     * @param reservDao
-     * @param clientDao
+     * @param isInsert indica si la vista es para inserción
+     * @param table tabla de reservas que se actualizará
+     * @param mainView referencia a la vista principal
+     * @param dao DAO de habitaciones
+     * @param reservDao DAO de reservas
+     * @param clientDao DAO de clientes
      */
     public AddReservationView(boolean isInsert, JTable table, MainView mainView, RoomDao dao, ReservationDao reservDao, ClientDao clientDao) {
         initComponents();
@@ -62,21 +96,23 @@ public class AddReservationView extends javax.swing.JFrame {
         addWindowClosingEvent();
         assignRoomNumbersMap();
         setLocation(700, 450);
-        
+
         if (roomNumbers.get("Standard") == null) {
             roomNumberSelBox.setEnabled(false);
         }
     }
 
     /**
+     * Crea una nueva instancia de AddReservationView para editar una reserva
+     * existente.
      *
-     * @param isInsert
-     * @param model
-     * @param data
-     * @param mainView
-     * @param roomDao
-     * @param reservDao
-     * @param clientDao
+     * @param isInsert indica si la vista es para inserción o edición
+     * @param model tabla asociada a las reservas
+     * @param data datos de la reserva seleccionada
+     * @param mainView vista principal
+     * @param roomDao DAO de habitaciones
+     * @param reservDao DAO de reservas
+     * @param clientDao DAO de clientes
      */
     public AddReservationView(boolean isInsert, JTable model, Object[] data, MainView mainView, RoomDao roomDao, ReservationDao reservDao, ClientDao clientDao) {
         initComponents();
@@ -96,6 +132,12 @@ public class AddReservationView extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Completa los campos y selectores de la interfaz con los datos de la
+     * reserva seleccionada.
+     *
+     * @param data arreglo de objetos con los valores de la reserva
+     */
     private void completeSelectors(Object[] data) {
         Map<String, String> map = new HashMap<>();
         map.put("id", (String) data[0]);
@@ -118,6 +160,10 @@ public class AddReservationView extends javax.swing.JFrame {
 
     }
 
+    /**
+     * Asigna el mapa de números de habitación disponibles por categoría,
+     * excluyendo las habitaciones actualmente reservadas.
+     */
     private void assignRoomNumbersMap() {
         roomNumberSelBox.removeAllItems();
         ArrayList<Room> rooms = (ArrayList<Room>) roomDao.getAll();
@@ -151,10 +197,19 @@ public class AddReservationView extends javax.swing.JFrame {
 
     }
 
+    /**
+     * Establece el nombre del cliente en el campo de texto correspondiente.
+     *
+     * @param nombre nombre del cliente
+     */
     public void setClientName(String nombre) {
         this.NewClientTxtField.setText(nombre);
     }
 
+    /**
+     * Agrega un listener para manejar el evento de cierre de ventana. Restaura
+     * la visibilidad y habilitación de la vista principal.
+     */
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
             @Override
@@ -323,6 +378,12 @@ public class AddReservationView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Evento al cambiar la categoría de habitación seleccionada. Actualiza las
+     * habitaciones disponibles para la nueva categoría.
+     *
+     * @param evt evento de selección
+     */
     private void roomCategorySelBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roomCategorySelBoxActionPerformed
         roomNumberSelBox.removeAllItems();
         if (!isInsert) {
@@ -347,11 +408,23 @@ public class AddReservationView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_roomCategorySelBoxActionPerformed
 
+    /**
+     * Evento del botón "Añadir Nuevo Cliente". Abre una nueva ventana para
+     * registrar un cliente y desactiva la actual.
+     *
+     * @param evt evento de clic
+     */
     private void AddUserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddUserBtnActionPerformed
         AddClientView adv = new AddClientView(clientDao, this, (DefaultTableModel) table.getModel());
         adv.setVisible(true);
         this.setEnabled(false);
     }//GEN-LAST:event_AddUserBtnActionPerformed
+
+    /**
+     * Obtiene el ID del cliente a partir de su nombre.
+     *
+     * @return el ID del cliente, o -1 si no se encuentra
+     */
     private int getIdByName() {
         for (Client c : clientDao.getAll()) {
             if (c.getName().equalsIgnoreCase(NewClientTxtField.getText())) {
@@ -361,9 +434,42 @@ public class AddReservationView extends javax.swing.JFrame {
         return -1;
     }
 
+        /**
+     * Evento del botón "Reservar".
+     * <p>
+     * Este método valida los datos ingresados antes de registrar o actualizar
+     * una reserva en el sistema. Se asegura de que:
+     * </p>
+     * <ul>
+     *   <li>Todos los campos obligatorios estén completos.</li>
+     *   <li>La fecha de finalización no sea anterior ni igual a la fecha de inicio.</li>
+     *   <li>El cliente exista en la base de datos.</li>
+     *   <li>La habitación seleccionada esté disponible durante el rango de fechas indicado (sin solapamientos con otras reservas).</li>
+     * </ul>
+     * <p>
+     * Si todas las validaciones son correctas, inserta una nueva reserva o actualiza
+     * una existente según el modo actual de la vista (<code>isInsert</code>).
+     * Luego, recarga la tabla principal de reservas y cierra la ventana.
+     * </p>
+     *
+     * @param evt evento de clic del botón "Reservar"
+     */
+
     private void ReserveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ReserveBtnActionPerformed
         if (NewClientTxtField == null || reservDateChooser.getDate() == null || endDateChooser.getDate() == null || roomNumberSelBox.getSelectedItem() == null || roomNumberSelBox.getSelectedItem() == null) {
             Utils.ShowInfo("Complete los datos");
+            return;
+        }
+
+        Date startDate = reservDateChooser.getDate();
+        Date endDate = endDateChooser.getDate();
+        
+        if (endDate.before(startDate)) {
+            Utils.ShowInfo("La fecha final no puede ser anterior a la fecha inicial.");
+            return;
+        }
+        if (endDate.equals(startDate)) {
+            Utils.ShowInfo("La reserva debe tener al menos un día de duración");
             return;
         }
         int clientId = getIdByName();
@@ -393,18 +499,24 @@ public class AddReservationView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_ReserveBtnActionPerformed
 
+    /**
+     * Evento del botón "Administrar Habitaciones". Abre la ventana de
+     * administración de habitaciones.
+     *
+     * @param evt evento de clic
+     */
     private void adminRoomsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminRoomsBtnActionPerformed
-        AdminRoomsView adminRoomView = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(), this, clientDao,roomNumbers);
+        AdminRoomsView adminRoomView = new AdminRoomsView(reservDao, roomDao, (DefaultTableModel) table.getModel(), this, clientDao, roomNumbers);
         this.setEnabled(false);
         adminRoomView.setVisible(true);
     }//GEN-LAST:event_adminRoomsBtnActionPerformed
 
-    public void resetRoomNumberHashMap(){
+    /**
+     * Reinicializa el mapa de números de habitación disponibles.
+     */
+    public void resetRoomNumberHashMap() {
         this.assignRoomNumbersMap();
     }
-    /**
-     * @param args the command line arguments
-     */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddUserBtn;

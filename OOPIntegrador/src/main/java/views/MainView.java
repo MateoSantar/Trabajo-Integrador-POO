@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package views;
 
 import java.sql.*;
@@ -11,23 +7,35 @@ import javax.swing.table.DefaultTableModel;
 import models.*;
 
 /**
- *
+ * Ventana principal del sistema de reservas.
+ * Permite visualizar, buscar, actualizar y eliminar reservas existentes.
+ * Además, brinda acceso a la creación de nuevas reservas.
+ * 
+ * <p>Esta clase extiende {@link javax.swing.JFrame} y representa la interfaz principal del usuario.</p>
+ * 
  * @author Mateo Santarsiero
  */
 public class MainView extends javax.swing.JFrame {
 
-    /**
-     * Creates new form MainView
-     */
+   /** Conexión activa a la base de datos. */
     private final Connection conn;
+
+    /** DAO para gestión de habitaciones. */
     private RoomDao rooms;
+
+    /** DAO para gestión de clientes. */
     private ClientDao clients;
+
+    /** DAO para gestión de reservas. */
     private ReservationDao reservs;
+
+    /** Modelo de tabla principal utilizado para mostrar reservas. */
     private DefaultTableModel tableDefaultModel;
 
     /**
-     *
-     * @param conn
+     * Crea una nueva instancia de la vista principal.
+     * 
+     * @param conn Conexión activa con la base de datos.
      */
     public MainView(Connection conn) {
         this.conn = conn;
@@ -42,11 +50,10 @@ public class MainView extends javax.swing.JFrame {
     }
 
     /**
-     *
-     * @param window
+     * Carga todas las reservas en la tabla principal.
+     * Obtiene los datos desde {@link ReservationDao} y los
+     * formatea para mostrarlos al usuario.
      */
-    
-
     private void loadReservations() {
         DefaultTableModel model = (DefaultTableModel) reservationsTable.getModel();
         model.setRowCount(0);
@@ -66,12 +73,20 @@ public class MainView extends javax.swing.JFrame {
 
     }
 
+    /**
+     * Recarga las reservas desde la base de datos y actualiza la tabla principal.
+     */
     public void reloadReservations() {
         this.loadReservations();
     }
 
-    ;
 
+    /**
+     * Obtiene el nombre del cliente asociado a un ID.
+     * 
+     * @param id ID del cliente.
+     * @return Nombre del cliente, o {@code null} si no se encuentra.
+     */
     private String getClientName(int id) {
         for (Client c : clients.getAll()) {
             if (c.getID() == id) {
@@ -81,6 +96,12 @@ public class MainView extends javax.swing.JFrame {
         return null;
     }
 
+    /**
+     * Devuelve la categoría de una habitación a partir de su número.
+     * 
+     * @param roomNumber Número de habitación.
+     * @return Categoría de la habitación, o {@code null} si no se encuentra.
+     */
     private String getRoomCategory(int roomNumber) {
         for (Room r : rooms.getAll()) {
             if (r.getRoomNumber() == roomNumber) {
@@ -90,6 +111,12 @@ public class MainView extends javax.swing.JFrame {
         return null;
     }
 
+    /**
+     * Obtiene el precio de una habitación a partir de su número.
+     * 
+     * @param roomNumber Número de habitación.
+     * @return Precio de la habitación, o {@code -1} si no se encuentra.
+     */
     private double getRoomPrice(int roomNumber) {
         for (Room r : rooms.getAll()) {
             if (r.getRoomNumber() == roomNumber) {
@@ -98,6 +125,10 @@ public class MainView extends javax.swing.JFrame {
         }
         return -1;
     }
+
+    /**
+     * Elimina las filas por defecto generadas por el GUI Builder de NetBeans.
+     */
 
     private void removeDefaultRows() {
         DefaultTableModel model = (DefaultTableModel) reservationsTable.getModel();
@@ -255,12 +286,24 @@ public class MainView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Acción ejecutada al presionar el botón "Reservar".
+     * Abre la vista {@link AddReservationView} para crear una nueva reserva.
+     * 
+     * @param evt Evento de acción generado por el botón.
+     */
     private void reserveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reserveBtnActionPerformed
         AddReservationView arv = new AddReservationView(true, reservationsTable, this, rooms, reservs, clients);
         arv.setVisible(true);
         this.setEnabled(false);
     }//GEN-LAST:event_reserveBtnActionPerformed
 
+    /**
+     * Acción ejecutada al presionar el botón "Actualizar".
+     * Permite modificar una reserva existente seleccionada en la tabla.
+     * 
+     * @param evt Evento de acción generado por el botón.
+     */
     private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
         int selectedRow = reservationsTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -278,6 +321,12 @@ public class MainView extends javax.swing.JFrame {
         this.setEnabled(false);
     }//GEN-LAST:event_updateBtnActionPerformed
 
+    /**
+     * Acción ejecutada al presionar el botón "Eliminar".
+     * Elimina la reserva seleccionada de la base de datos y de la tabla.
+     * 
+     * @param evt Evento de acción generado por el botón.
+     */
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         int selectedRow = reservationsTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -290,6 +339,12 @@ public class MainView extends javax.swing.JFrame {
         dtm.removeRow(selectedRow);
     }//GEN-LAST:event_deleteBtnActionPerformed
 
+    /**
+     * Acción ejecutada al presionar el botón "Listar".
+     * Realiza una búsqueda según el criterio seleccionado (ID, Cliente o Categoría).
+     * 
+     * @param evt Evento de acción generado por el botón.
+     */
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
         String selectedFactor = searchFactorComboBox.getSelectedItem().toString();
         if (searchTextField.getText().isBlank()) {
@@ -317,6 +372,13 @@ public class MainView extends javax.swing.JFrame {
 
 
     }//GEN-LAST:event_searchBtnActionPerformed
+    
+    /**
+     * Busca una reserva por su ID.
+     * 
+     * @param id ID de la reserva.
+     * @param model Modelo de tabla actual.
+     */
     private void searchById(String id, DefaultTableModel model) {
         int rowCount = model.getRowCount();
         int columnCount = model.getColumnCount();
@@ -342,6 +404,12 @@ public class MainView extends javax.swing.JFrame {
         reservationsTable.setModel(modelFound);
     }
 
+    /**
+     * Busca reservas por nombre del cliente.
+     * 
+     * @param name Nombre del cliente.
+     * @param model Modelo de tabla actual.
+     */
     private void searchByClientName(String name, DefaultTableModel model) {
         int rowCount = model.getRowCount();
         int columnCount = model.getColumnCount();
@@ -370,6 +438,13 @@ public class MainView extends javax.swing.JFrame {
         reservationsTable.setModel(modelFound);
     }
 
+    
+    /**
+     * Busca reservas por categoría de habitación.
+     * 
+     * @param category Categoría a buscar.
+     * @param model Modelo de tabla actual.
+     */
     private void searchByCategory(String category, DefaultTableModel model) {
         int rowCount = model.getRowCount();
         int columnCount = model.getColumnCount();

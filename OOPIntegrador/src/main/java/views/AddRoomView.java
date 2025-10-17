@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package views;
 
 import java.awt.event.WindowAdapter;
@@ -13,19 +9,42 @@ import models.RoomDao;
 import models.Utils;
 
 /**
+ * Ventana para agregar o editar habitaciones dentro del sistema de gestión de reservas.
+ * Permite crear nuevas habitaciones o modificar existentes, actualizando la vista
+ * principal de administración de habitaciones.
+ *
+ * <p>Esta clase puede ser instanciada en dos modos:
+ * <ul>
+ *   <li><b>Modo Agregar:</b> Permite añadir una nueva habitación.</li>
+ *   <li><b>Modo Editar:</b> Permite modificar una habitación existente.</li>
+ * </ul>
  *
  * @author Mateo Santarsiero
  */
 public class AddRoomView extends javax.swing.JFrame {
 
-    /**
-     * Creates new form AddRoomView
-     */
+    /** DAO que gestiona las operaciones sobre las habitaciones. */
     private final RoomDao rooms;
+
+    /** Vista principal de administración de habitaciones que invoca esta ventana. */
     private final AdminRoomsView adminRoomView;
+
+    /** Identificador de la habitación en caso de edición. */
     private int editRoomId = -1;
+
+    /** Referencia a la habitación actualmente editada. */
     private Room actualRoom;
+
+    /** Mapa que asocia categorías de habitación con sus números disponibles. */
     private HashMap<String, ArrayList<Integer>> roomNumbers = new HashMap<>();
+
+    /**
+     * Constructor para el modo de agregado de una nueva habitación.
+     *
+     * @param rooms instancia de {@link RoomDao} para realizar operaciones de base de datos.
+     * @param arv vista principal de administración de habitaciones.
+     * @param roomNumbers mapa que contiene los números de habitación por categoría.
+     */
 
     public AddRoomView(RoomDao rooms, AdminRoomsView arv, HashMap<String, ArrayList<Integer>> roomNumbers) { //Constructor de agregado
         initComponents();
@@ -39,7 +58,15 @@ public class AddRoomView extends javax.swing.JFrame {
 
     }
 
-    public AddRoomView(RoomDao rooms, AdminRoomsView arv, Room actualRoom, HashMap<String, ArrayList<Integer>> roomNumbers) { //Constructor de edicion
+    /**
+     * Constructor para el modo de edición de una habitación existente.
+     *
+     * @param rooms instancia de {@link RoomDao} para realizar operaciones de base de datos.
+     * @param arv vista principal de administración de habitaciones.
+     * @param actualRoom habitación actualmente seleccionada para edición.
+     * @param roomNumbers mapa que contiene los números de habitación por categoría.
+     */
+    public AddRoomView(RoomDao rooms, AdminRoomsView arv, Room actualRoom, HashMap<String, ArrayList<Integer>> roomNumbers) { 
         initComponents();
         this.rooms = rooms;
         this.adminRoomView = arv;
@@ -132,6 +159,11 @@ public class AddRoomView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Lógica del botón "Añadir".
+     * Valida los campos ingresados, crea una nueva habitación y la persiste en la base de datos.
+     * Si la habitación se crea correctamente, actualiza la tabla de la vista principal.
+     */
     private void addRoomActionPerformed() {
         if (newRoomNumberTxt.getText().isBlank() || newRoomPriceTxt.getText().isBlank()) {
             Utils.ShowInfo("Complete todos los campos");
@@ -158,6 +190,11 @@ public class AddRoomView extends javax.swing.JFrame {
         this.dispose();
     }
 
+    /**
+     * Lógica del botón "Aplicar" cuando se edita una habitación existente.
+     * Valida los campos ingresados y actualiza la información en la base de datos.
+     * También actualiza la vista principal y los datos asociados a las reservas.
+     */
     private void editRoomActionPerformed() {
         double price;
         int roomNum = actualRoom.getRoomNumber();
@@ -184,6 +221,10 @@ public class AddRoomView extends javax.swing.JFrame {
         this.dispose();
     }
 
+    /**
+     * Agrega un evento que maneja el cierre de la ventana.
+     * Cuando se cierra, vuelve a habilitar la vista principal.
+     */
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
             @Override

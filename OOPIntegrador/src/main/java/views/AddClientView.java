@@ -6,26 +6,45 @@ import javax.swing.table.DefaultTableModel;
 import models.Client;
 import models.ClientDao;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 
 /**
- *
- * @author Pedro
+ * Ventana encargada de agregar un nuevo cliente al sistema.
+ * <p>
+ * Esta vista permite ingresar los datos de un cliente (nombre, apellido y teléfono)
+ * y guardarlos en la base de datos mediante {@link ClientDao}. 
+ * Además, comunica el nuevo cliente a la vista {@link AddReservationView} para su selección.
+ * </p>
+ * 
+ * <p><b>Nota:</b> Parte del código fue generado automáticamente por NetBeans GUI Builder, 
+ * por lo tanto no debe modificarse manualmente las secciones delimitadas por comentarios
+ * 
+ * 
+ * @author Pedro Mendoza
  */
 
 public class AddClientView extends javax.swing.JFrame {
 
-    private DefaultTableModel table;
-    private final AddReservationView arv;
-    private final ClientDao clientDao;
     /**
-     * Creates new form NewJFrame
-     * @param clientDao
-     * @param arv
-     * @param table
+     * Modelo de tabla utilizado por la vista principal para mostrar los clientes.
+     */
+    private DefaultTableModel table;
+
+    /**
+     * Referencia a la vista de reserva desde la que se abrió este formulario.
+     */
+    private final AddReservationView arv;
+
+    /**
+     * Objeto de acceso a datos para clientes.
+     */
+    private final ClientDao clientDao;
+
+    /**
+     * Crea una nueva instancia de la vista para agregar clientes.
+     *
+     * @param clientDao instancia de {@link ClientDao} utilizada para guardar los clientes.
+     * @param arv referencia a la vista {@link AddReservationView} que invocó este formulario.
+     * @param table modelo de tabla donde se reflejan los cambios de clientes.
      */
     public AddClientView(ClientDao clientDao, AddReservationView arv, DefaultTableModel table) {
         initComponents();
@@ -38,6 +57,15 @@ public class AddClientView extends javax.swing.JFrame {
         
 
     }
+    
+    
+    /**
+     * Agrega un evento de cierre de ventana personalizado.
+     * <p>
+     * Cuando se intenta cerrar la ventana, se vuelve a habilitar la vista de reserva 
+     * y se libera el recurso de esta ventana.
+     * </p>
+     */
     private void addWindowClosingEvent() {
         addWindowListener(new WindowAdapter() {
             @Override
@@ -122,6 +150,15 @@ public class AddClientView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
  
     
+    /**
+     * Evento ejecutado al presionar el botón "Añadir".
+     * <p>
+     * Valida los campos del formulario, crea un nuevo objeto {@link Client} y lo guarda en la base de datos
+     * utilizando {@link ClientDao#save(models.Client)}. Finalmente, actualiza la vista de reserva y cierra la ventana.
+     * </p>
+     * 
+     * @param evt evento de acción generado por el botón.
+     */
     private void addClientButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addClientButtonActionPerformed
         String name = nameTxtField.getText();
         String surname = surNameTxtFlied.getText();
